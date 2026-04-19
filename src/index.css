@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+  
+  /* Earthy Premium Palette - Inspired by Nature & Sunlit Campus */
+  --color-brand-50: #fbfaf8;  /* Warm ivory */
+  --color-brand-100: #efeae0; /* Kraft paper / Sand */
+  --color-brand-200: #dfd8c7;
+  --color-brand-300: #c2baaa;
+  --color-brand-400: #a29d8b;
+  --color-brand-500: #827e6e;
+  --color-brand-600: #605f51;
+  --color-brand-700: #424336; /* Forest muted green-brown */
+  --color-brand-800: #2c2e23; /* Deep foliage */
+  --color-brand-900: #1a1b14; /* Deepest shadow */
+}
+
+@layer base {
+  html {
+    scroll-behavior: auto !important; /* Managed by Lenis */
+  }
+
+  body {
+    @apply bg-brand-100 text-brand-900 font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-serif font-light;
+  }
+
+  html.lenis, html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  .lenis.lenis-scrolling iframe {
+    pointer-events: none;
+  }
+
+  /* Custom Scrollbar - Minimal */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-brand-50;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-brand-300 rounded-full hover:bg-brand-400;
+  }
+}
+
+@layer utilities {
+  .grid-rows-0 { grid-template-rows: 0fr; }
+  .grid-rows-1 { grid-template-rows: 1fr; }
+  
+  .text-luxury {
+    @apply tracking-[-0.03em] leading-[0.9] font-serif uppercase;
+  }
+
+  .negative-space {
+    @apply py-[20vh] px-6 md:px-12 lg:px-20;
+  }
+  
+  .kraft-texture {
+    background-color: var(--color-brand-100);
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/H0ZkAAAACHRSTlMA/////////9EwkUIAAAAlSURBVDjLxY3BEcMwCEPBz0kFcg3P/qt0GDAwlL7+JgKBhPD+4VnO+rZftb1Xy9n1a/vE3vGZ1L33uT+r18kS5yT2lK8+9/oHn5y4v85I+Nw+sXz3nN+799m8R61v027xHplY52P5yHPy5M995u/2P1H7D3L35s/J3+A9yP0/5u/7P3Lv7Tnm/yD3w5kH3M+55///IEdAAAAAElFTkSuQmCC");
+    background-repeat: repeat;
+    background-size: 50px 50px;
+    background-attachment: fixed;
+  }
+}
+
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20;
+}
+
+.section-transition {
+  @apply py-24 px-6 max-w-7xl mx-auto;
+}
