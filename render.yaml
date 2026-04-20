@@ -1,6 +1,6 @@
 databases:
   - name: campus-cycle-db
-    plan: basic-256mb
+    plan: free
     databaseName: campus_cycle
     user: campus_cycle_user
 
@@ -8,13 +8,9 @@ services:
   - type: web
     name: campus-cycle-web1-tangtaizong666
     runtime: docker
-    plan: starter
+    plan: free
     autoDeploy: true
     healthCheckPath: /api/health
-    disk:
-      name: uploads
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
@@ -33,6 +29,6 @@ services:
       - key: AI_MODEL
         value: gpt-5.4
       - key: UPLOAD_DIR
-        value: /var/data/uploads
+        value: /tmp/uploads
       - key: MAX_UPLOAD_SIZE_MB
         value: 10
