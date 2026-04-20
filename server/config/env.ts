@@ -7,7 +7,7 @@ const envSchema = z
     NODE_ENV: nodeEnvSchema.default('development'),
     PORT: z.coerce.number().optional(),
     SERVER_PORT: z.coerce.number().optional(),
-    APP_URL: z.string().url().default('http://localhost:3000'),
+    APP_URL: z.string().url().optional(),
     DATABASE_URL: z.string().min(1).optional(),
     SESSION_SECRET: z.string().min(32).optional(),
     AI_RELAY_BASE_URL: z.string().url().default('http://localhost:6543'),
@@ -57,9 +57,17 @@ const parsedEnv = envSchema.parse(process.env);
 export const env = {
   ...parsedEnv,
   SERVER_PORT: parsedEnv.SERVER_PORT ?? parsedEnv.PORT ?? 4000,
+  APP_URL:
+    parsedEnv.APP_URL?.trim() ||
+    process.env.RENDER_EXTERNAL_URL?.trim() ||
+    'http://localhost:3000',
   DATABASE_URL:
     parsedEnv.DATABASE_URL?.trim() || 'postgres://postgres:postgres@localhost:5432/campus_cycle',
   SESSION_SECRET: parsedEnv.SESSION_SECRET?.trim() || 'development-session-secret-change-me',
   AI_RELAY_API_KEY: parsedEnv.AI_RELAY_API_KEY?.trim() || 'development-key',
-  APP_ORIGIN: new URL(parsedEnv.APP_URL).origin,
+  APP_ORIGIN: new URL(
+    parsedEnv.APP_URL?.trim() ||
+      process.env.RENDER_EXTERNAL_URL?.trim() ||
+      'http://localhost:3000',
+  ).origin,
 } as const;
