@@ -63,7 +63,7 @@ export default function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       // Create a single main timeline scrubbed to the whole pinned section
       const tl = gsap.timeline({
         scrollTrigger: {

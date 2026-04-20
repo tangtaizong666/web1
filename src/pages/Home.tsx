@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,12 +11,16 @@ import Process from '../components/Process';
 import Showcase from '../components/Showcase';
 import FAQ from '../components/FAQ';
 import { Recycle, ShoppingBag, Heart, Sparkles } from 'lucide-react';
+import { AuthModal } from '../components/auth/AuthModal';
+import { useAuth } from '../hooks/useAuth';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
   const lenisRef = useRef<Lenis | null>(null);
   const navigate = useNavigate();
+  const { user, loginUser, registerUser, logoutUser } = useAuth();
+  const [authMode, setAuthMode] = useState<'login' | 'register' | null>(null);
 
   useLayoutEffect(() => {
     // Initialize Lenis
@@ -55,6 +59,34 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-brand-100 selection:bg-brand-900 selection:text-brand-50">
+      <div className="fixed left-4 top-4 z-50 flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50/90 px-3 py-2 shadow-sm backdrop-blur">
+        {user ? (
+          <>
+            <span className="text-sm text-brand-700">{user.email}</span>
+            <button onClick={() => void logoutUser()} className="text-sm text-brand-900">
+              退出
+            </button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setAuthMode('login')} className="text-sm text-brand-900">
+              登录
+            </button>
+            <button onClick={() => setAuthMode('register')} className="text-sm text-brand-500">
+              注册
+            </button>
+          </>
+        )}
+      </div>
+
+      {authMode ? (
+        <AuthModal
+          mode={authMode}
+          onClose={() => setAuthMode(null)}
+          onSubmit={authMode === 'login' ? loginUser : registerUser}
+        />
+      ) : null}
+
       <main>
         <Hero />
         

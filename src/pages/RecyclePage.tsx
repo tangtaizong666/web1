@@ -20,6 +20,7 @@ import RecycleMapModal, {
   type MapLocation,
   type RecycleBin,
 } from '../components/RecycleMapModal';
+import { DEFAULT_MAP_LOCATION, RECYCLE_BIN_BLUEPRINTS } from '../data/recycle';
 
 const CLOTHING_TYPES = ["上衣", "裤装", "裙装", "外套", "鞋履包袋", "旧床单/其他面料"];
 
@@ -46,22 +47,6 @@ const CONDITIONS = [
   },
 ];
 
-const DEFAULT_MAP_LOCATION: MapLocation = {
-  lat: 39.9042,
-  lng: 116.4074,
-  label: '北京市朝阳区三里屯商圈',
-  source: 'search',
-};
-
-const BIN_BLUEPRINTS = [
-  { id: 'bin-east-gate', name: '校园东门智能箱', latOffset: 0.0036, lngOffset: 0.0024, status: 'available' },
-  { id: 'bin-library', name: '图书馆西侧回收点', latOffset: -0.0024, lngOffset: 0.0031, status: 'available' },
-  { id: 'bin-dormitory', name: '宿舍区北门回收点', latOffset: 0.0018, lngOffset: -0.0032, status: 'available' },
-  { id: 'bin-cafe', name: '生活服务中心回收站', latOffset: -0.0035, lngOffset: -0.0012, status: 'full' },
-  { id: 'bin-gym', name: '体育馆南侧回收点', latOffset: 0.0045, lngOffset: -0.0008, status: 'available' },
-  { id: 'bin-lake', name: '湖畔共享回收箱', latOffset: -0.0015, lngOffset: 0.0048, status: 'available' },
-] as const;
-
 type NominatimSearchResult = {
   lat: string;
   lon: string;
@@ -72,11 +57,14 @@ type NominatimReverseResult = {
   display_name?: string;
 };
 
+type LocateTarget = 'dropoff' | 'pickup';
+
 export default function RecyclePage() {
   const navigate = useNavigate();
   const [method, setMethod] = useState<'dropoff' | 'pickup'>('dropoff');
   const [showMap, setShowMap] = useState(false);
   const [addressSearch, setAddressSearch] = useState('');
+  const [pickupAddress, setPickupAddress] = useState('');
   const [mapLocation, setMapLocation] = useState<MapLocation | null>(null);
   const [userLocation, setUserLocation] = useState<MapLocation | null>(null);
   const [locationError, setLocationError] = useState('');
@@ -130,10 +118,12 @@ export default function RecyclePage() {
     setShowMap(true);
   };
 
-  const handleAutoLocate = () => {
+  const handleAutoLocate = (target: LocateTarget = 'dropoff') => {
     if (!navigator.geolocation) {
       setLocationError('当前浏览器不支持定位功能，请先手动输入位置。');
-      setShowMap(true);
+      if (target === 'dropoff') {
+        setShowMap(true);
+      }
       return;
     }
 
@@ -160,13 +150,21 @@ export default function RecyclePage() {
 
         setUserLocation(nextLocation);
         setMapLocation(nextLocation);
-        setAddressSearch(label);
-        setShowMap(true);
+
+        if (target === 'dropoff') {
+          setAddressSearch(label);
+          setShowMap(true);
+        } else {
+          setPickupAddress(label);
+        }
+
         setIsLocating(false);
       },
       (error) => {
         setLocationError(getGeolocationErrorMessage(error));
-        setShowMap(true);
+        if (target === 'dropoff') {
+          setShowMap(true);
+        }
         setIsLocating(false);
       },
       {
@@ -274,7 +272,7 @@ export default function RecyclePage() {
                                       搜索位置
                                     </button>
                                      <button
-                                       onClick={handleAutoLocate}
+                                       onClick={() => handleAutoLocate('dropoff')}
                                        disabled={isLocating}
                                        className="px-4 py-3.5 text-[#986E4B] hover:text-[#6C4B30] flex items-center justify-center gap-2 text-sm font-medium border-l border-[#DECFBE] bg-[#F4F0E8] transition-colors disabled:opacity-60 disabled:cursor-wait"
                                      >
@@ -331,10 +329,39 @@ export default function RecyclePage() {
                      >
                            <div className="space-y-4">
                                <label className="text-xs text-[#986E4B] font-bold uppercase tracking-wider block">Address / 上门地址</label>
-                               <div className="flex items-center bg-[#FDFBF7] border border-[#DECFBE] rounded-2xl overflow-hidden focus-within:border-[#986E4B] transition-colors shadow-sm px-5 py-4">
-                                    <MapPin className="w-5 h-5 text-[#BAAFA0] mr-3" />
-                                    <input type="text" placeholder="请输入详细地址 (省市区/街道/门牌号)" className="w-full outline-none text-[#362A1F] placeholder:text-[#BAAFA0] bg-transparent" />
+                               <div className="bg-[#FDFBF7] border border-[#DECFBE] rounded-2xl overflow-hidden focus-within:border-[#986E4B] transition-colors shadow-sm">
+                                    <div className="flex items-center px-5 py-4">
+                                      <MapPin className="w-5 h-5 text-[#BAAFA0] mr-3" />
+                                      <input
+                                        type="text"
+                                        value={pickupAddress}
+                                        onChange={(event) => setPickupAddress(event.target.value)}
+                                        placeholder="请输入详细地址 (省市区/街道/门牌号)"
+                                        className="w-full outline-none text-[#362A1F] placeholder:text-[#BAAFA0] bg-transparent"
+                                      />
+                                    </div>
+                                    <div className="border-t border-[#DECFBE] bg-[#F4F0E8] px-4 py-3 flex items-center justify-between gap-3">
+                                      <div className="text-xs text-[#7F6B58]">可自动填入当前位置，方便预约上门回收。</div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleAutoLocate('pickup')}
+                                        disabled={isLocating}
+                                        className="shrink-0 px-4 py-2 rounded-full border border-[#DECFBE] bg-[#FDFBF7] text-[#986E4B] hover:text-[#6C4B30] text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-60 disabled:cursor-wait"
+                                      >
+                                        {isLocating ? (
+                                          <LoaderCircle className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                          <Navigation2 className="w-4 h-4" />
+                                        )}
+                                        自动定位
+                                      </button>
+                                    </div>
                                </div>
+                               {locationError ? (
+                                 <div className="text-sm text-[#A25344] bg-[#F8E5DE] border border-[#EBCABE] rounded-2xl px-4 py-3">
+                                   {locationError}
+                                 </div>
+                               ) : null}
                            </div>
 
                            <div className="grid grid-cols-2 gap-4 mt-4">
@@ -463,7 +490,7 @@ export default function RecyclePage() {
             isLocating={isLocating}
             isSearching={isSearchingLocation}
             locationQuery={addressSearch}
-            onAutoLocate={handleAutoLocate}
+            onAutoLocate={() => handleAutoLocate('dropoff')}
             onClose={() => setShowMap(false)}
             onQueryChange={setAddressSearch}
             onSearch={() => void handleSearchLocation()}
@@ -476,7 +503,7 @@ export default function RecyclePage() {
 }
 
 function buildNearbyBins(center: MapLocation): RecycleBin[] {
-  return BIN_BLUEPRINTS.map((bin) => {
+  return RECYCLE_BIN_BLUEPRINTS.map((bin) => {
     const lat = center.lat + bin.latOffset;
     const lng = center.lng + bin.lngOffset;
     const distanceMeters = calculateDistanceMeters(center.lat, center.lng, lat, lng);
