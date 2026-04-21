@@ -5,6 +5,7 @@ import { pool } from '../db/pool';
 
 const COOKIE_NAME = 'campus_cycle_session';
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+const usesSecureCookies = new URL(env.APP_URL).protocol === 'https:';
 
 export async function createSession(userId: string) {
   const id = crypto.randomUUID();
@@ -32,7 +33,7 @@ export function setSessionCookie(response: Response, sessionId: string, expiresA
   response.cookie(COOKIE_NAME, sessionId, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: env.NODE_ENV === 'production',
+    secure: usesSecureCookies,
     expires: expiresAt,
   });
 }
@@ -41,7 +42,7 @@ export function clearSessionCookie(response: Response) {
   response.clearCookie(COOKIE_NAME, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: env.NODE_ENV === 'production',
+    secure: usesSecureCookies,
   });
 }
 
