@@ -18,6 +18,7 @@ import { importGuestConversations } from '../lib/chat';
 
 export default function AIAssistant() {
   const { user, isLoading, loginUser, registerUser, logoutUser } = useAuth();
+  const uploadsFeatureEnabled = import.meta.env.VITE_ENABLE_ATTACHMENTS !== 'false';
   const [authMode, setAuthMode] = useState<'login' | 'register' | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [pageNotice, setPageNotice] = useState('');
@@ -242,9 +243,13 @@ export default function AIAssistant() {
         <ChatComposer
           sending={sending}
           attachments={attachments}
-          uploadsEnabled={Boolean(user)}
+          uploadsEnabled={Boolean(user) && uploadsFeatureEnabled}
           uploadHelperText={
-            user ? '支持上传文本、图片和语音。' : '游客模式下先支持文本聊天，登录后可上传图片、文件和语音。'
+            user
+              ? uploadsFeatureEnabled
+                ? '支持上传文本、图片和语音。'
+                : '当前部署环境先开放文本聊天，附件上传稍后再接入。'
+              : '游客模式下先支持文本聊天，登录后可上传图片、文件和语音。'
           }
           onUpload={addAttachment}
           onRemoveAttachment={removeAttachment}

@@ -1,10 +1,10 @@
 import { createApp } from './app';
 import { env } from './config/env';
-import { runMigrations } from './db/migrate';
+import { ensureServerReady } from './bootstrap';
 import { databaseMode } from './db/pool';
 
 async function main() {
-  await runMigrations();
+  await ensureServerReady();
   const app = createApp();
 
   app.listen(env.SERVER_PORT, () => {

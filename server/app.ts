@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import cookieParser from 'cookie-parser';
@@ -12,12 +13,19 @@ import { messagesRouter } from './routes/messages';
 import { uploadsRouter } from './routes/uploads';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, '..');
-const distDir = path.join(projectRoot, 'dist');
-const distIndexPath = path.join(distDir, 'index.html');
+const distDirCandidates = [
+  path.resolve(process.cwd(), 'dist'),
+  path.resolve(__dirname, '..', 'dist'),
+];
+const distDir = distDirCandidates.find((candidate) => fs.existsSync(path.join(candidate, 'index.html')));
+const distIndexPath = distDir ? path.join(distDir, 'index.html') : null;
 
-export function createApp() {
+export function createApp(options?: {
+  onRequestStart?: () => Promise<void>;
+  serveStaticAssets?: boolean;
+}) {
   const app = express();
+  const serveStaticAssets = options?.serveStaticAssets ?? true;
 
   app.use(
     cors({
@@ -27,6 +35,17 @@ export function createApp() {
   );
   app.use(cookieParser());
   app.use(express.json({ limit: '2mb' }));
+
+  if (options?.onRequestStart) {
+    app.use((_request, _response, next) => {
+      void options
+        .onRequestStart!()
+        .then(() => {
+          next();
+        })
+        .catch(next);
+    });
+  }
 
   app.get('/api/health', (_request, response) => {
     response.json({ ok: true });
@@ -38,20 +57,22 @@ export function createApp() {
   app.use('/api', messagesRouter);
   app.use('/api/uploads', uploadsRouter);
 
-  app.use(express.static(distDir));
+  if (serveStaticAssets && distDir && distIndexPath) {
+    app.use(express.static(distDir));
 
-  app.get('*', (request, response, next) => {
-    if (request.path.startsWith('/api')) {
-      next();
-      return;
-    }
-
-    response.sendFile(distIndexPath, (error) => {
-      if (error) {
-        next(error);
+    app.get('*', (request, response, next) => {
+      if (request.path.startsWith('/api')) {
+        next();
+        return;
       }
+
+      response.sendFile(distIndexPath, (error) => {
+        if (error) {
+          next(error);
+        }
+      });
     });
-  });
+  }
 
   app.use((_request, response) => {
     response.status(404).json({ error: 'Not Found' });
