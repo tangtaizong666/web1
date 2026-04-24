@@ -125,7 +125,7 @@ export default function AIAssistant() {
   }
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-[#FDFBF7]">
+    <div className="relative flex h-[100svh] max-w-full overflow-hidden bg-[#FDFBF7]">
       {authMode ? (
         <AuthModal
           mode={authMode}
@@ -151,7 +151,7 @@ export default function AIAssistant() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -320, opacity: 0 }}
               transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-y-0 left-0 z-30"
+              className="absolute inset-y-0 left-0 z-30 max-w-[88vw]"
             >
               <ConversationSidebar
                 conversations={conversations}
@@ -170,9 +170,9 @@ export default function AIAssistant() {
         ) : null}
       </AnimatePresence>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-[#DECFBE] bg-white/80 px-4 py-3 backdrop-blur">
-          <div className="flex items-center gap-3">
+      <div className="flex min-w-0 max-w-full flex-1 flex-col overflow-hidden">
+        <header className="flex max-w-full flex-wrap items-center justify-between gap-3 overflow-hidden border-b border-[#DECFBE] bg-white/80 px-3 py-3 backdrop-blur md:flex-nowrap md:px-4">
+          <div className="flex w-full min-w-0 max-w-full items-center gap-2 md:w-auto md:flex-1 md:gap-3">
             <button
               type="button"
               onClick={() => setIsSidebarOpen((current) => !current)}
@@ -181,22 +181,22 @@ export default function AIAssistant() {
             >
               <PanelLeft className="h-5 w-5" />
             </button>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-[#362A1F]">AI 循环助手</div>
-              <div className="text-xs text-[#7F6B58]">
+              <div className="truncate text-xs text-[#7F6B58]">
                 {user ? `已登录：${user.email}` : '游客模式可直接聊天，登录后会自动导入当前记录'}
               </div>
             </div>
             <Link
               to="/"
-              className="ml-2 inline-flex items-center gap-2 rounded-full border border-[#DECFBE] bg-white px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA]"
+              className="ml-0 inline-flex shrink-0 items-center gap-1 rounded-full border border-[#DECFBE] bg-white px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA] md:ml-2 md:gap-2"
             >
               <House className="h-4 w-4" />
-              返回首页
+              <span className="hidden sm:inline">返回首页</span>
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full min-w-0 items-center gap-2 md:ml-auto md:w-auto md:shrink-0 md:justify-end">
             {user ? (
               <>
                 <span className="hidden rounded-full border border-[#DECFBE] bg-[#F8F2EA] px-3 py-2 text-xs text-[#7F6B58] md:inline-flex">
@@ -216,16 +216,16 @@ export default function AIAssistant() {
                 <button
                   type="button"
                   onClick={() => setAuthMode('login')}
-                  className="rounded-full border border-[#DECFBE] bg-white px-4 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA]"
+                  className="min-w-0 flex-1 rounded-full border border-[#DECFBE] bg-white px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA] md:w-auto md:flex-none md:px-4"
                 >
                   登录
                 </button>
                 <button
                   type="button"
                   onClick={() => setAuthMode('register')}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#362A1F] px-4 py-2 text-sm text-white transition hover:bg-[#4A3A2D]"
+                  className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#362A1F] px-3 py-2 text-sm text-white transition hover:bg-[#4A3A2D] md:w-auto md:flex-none md:gap-2 md:px-4"
                 >
-                  <UserRound className="h-4 w-4" />
+                  <UserRound className="hidden h-4 w-4 sm:block" />
                   注册
                 </button>
               </>

@@ -59,7 +59,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-brand-100 selection:bg-brand-900 selection:text-brand-50">
-      <div className="fixed left-4 top-4 z-50 flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50/90 px-3 py-2 shadow-sm backdrop-blur">
+      <div className="fixed left-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-brand-200 bg-brand-50/90 px-3 py-2 shadow-sm backdrop-blur">
         {user ? (
           <>
             <span className="text-sm text-brand-700">{user.email}</span>
@@ -121,29 +121,29 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1 }}
-              className="text-[12vw] tracking-widest text-luxury text-center mb-12 font-serif"
+              className="mb-10 text-center font-serif text-[4rem] leading-none tracking-widest text-luxury md:mb-12 md:text-[12vw]"
             >
               循环新生
             </motion.h2>
             
-            <div className="flex flex-col lg:flex-row items-center justify-center gap-6 w-full max-w-4xl px-4">
+            <div className="flex w-full max-w-4xl flex-col items-stretch justify-center gap-4 px-0 sm:px-4 lg:flex-row lg:items-center lg:gap-6">
               <button 
                 onClick={() => navigate('/recycle')}
-                className="w-full lg:w-1/3 px-8 py-6 border border-brand-900 text-brand-900 rounded-full font-serif italic text-xl flex items-center justify-center gap-3 hover:bg-brand-900 hover:text-brand-50 transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.05)] text-center"
+                className="flex w-full items-center justify-center gap-3 rounded-full border border-brand-900 px-6 py-4 text-center font-serif text-lg italic text-brand-900 shadow-[0_4px_14px_rgba(0,0,0,0.05)] transition-colors hover:bg-brand-900 hover:text-brand-50 lg:w-1/3 lg:px-8 lg:py-6 lg:text-xl"
               >
                 <Recycle className="w-5 h-5 flex-shrink-0" />
                 立即投递旧衣
               </button>
               <button 
                 onClick={() => navigate('/shop')}
-                className="w-full lg:w-1/3 px-8 py-6 border border-brand-900 text-brand-900 rounded-full font-serif italic text-xl flex items-center justify-center gap-3 hover:bg-brand-900 hover:text-brand-50 transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.05)] text-center"
+                className="flex w-full items-center justify-center gap-3 rounded-full border border-brand-900 px-6 py-4 text-center font-serif text-lg italic text-brand-900 shadow-[0_4px_14px_rgba(0,0,0,0.05)] transition-colors hover:bg-brand-900 hover:text-brand-50 lg:w-1/3 lg:px-8 lg:py-6 lg:text-xl"
               >
                 <ShoppingBag className="w-5 h-5 flex-shrink-0" />
                 探索商店
               </button>
               <button 
                 onClick={() => navigate('/ai')}
-                className="w-full lg:w-1/3 px-8 py-6 border border-brand-900 text-brand-900 rounded-full font-serif italic text-xl flex items-center justify-center gap-3 hover:bg-brand-900 hover:text-brand-50 transition-colors shadow-[0_4px_14px_rgba(0,0,0,0.05)] text-center"
+                className="flex w-full items-center justify-center gap-3 rounded-full border border-brand-900 px-6 py-4 text-center font-serif text-lg italic text-brand-900 shadow-[0_4px_14px_rgba(0,0,0,0.05)] transition-colors hover:bg-brand-900 hover:text-brand-50 lg:w-1/3 lg:px-8 lg:py-6 lg:text-xl"
               >
                 <Sparkles className="w-5 h-5 flex-shrink-0" />
                 询问 AI 助手

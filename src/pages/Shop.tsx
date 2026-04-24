@@ -40,33 +40,33 @@ export default function Shop() {
   }, [searchQuery, activeCategory, sortBy]);
 
   return (
-    <div className="min-h-screen bg-brand-50 pt-8 px-6 md:px-12 lg:px-20 pb-32">
+    <div className="min-h-screen overflow-x-hidden bg-brand-50 px-5 pb-24 pt-6 md:px-12 md:pb-32 md:pt-8 lg:px-20">
       {/* Top Nav */}
-      <nav className="mb-12 relative z-10 flex justify-between items-center max-w-7xl mx-auto">
+      <nav className="relative z-10 mx-auto mb-10 flex max-w-7xl items-center justify-between gap-4 md:mb-12">
         <button 
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-brand-700 hover:text-brand-900 transition-colors font-serif italic text-lg"
+          className="flex min-w-0 items-center gap-2 font-serif text-base italic text-brand-700 transition-colors hover:text-brand-900 md:text-lg"
         >
           <ArrowLeft className="w-5 h-5" /> 返回首页
         </button>
-        <div className="font-serif italic text-2xl tracking-widest text-brand-900 border border-brand-900 rounded-full px-4 py-1">
+        <div className="hidden shrink-0 rounded-full border border-brand-900 px-4 py-1 font-serif text-lg italic tracking-widest text-brand-900 sm:block md:text-2xl">
           Store
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto">
         {/* Hero Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between pb-24 border-b border-brand-200 mt-12">
+        <div className="mt-8 flex flex-col items-center justify-between overflow-hidden border-b border-brand-200 pb-16 md:mt-12 md:flex-row md:pb-24">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1 }}
-            className="w-full md:w-1/2 pr-0 md:pr-12"
+            className="w-full min-w-0 pr-0 md:w-1/2 md:pr-12"
           >
-            <h1 className="text-6xl md:text-8xl font-serif text-brand-900 mb-8 tracking-widest leading-tight">
+            <h1 className="mb-6 font-serif text-5xl leading-tight tracking-widest text-brand-900 sm:text-6xl md:mb-8 md:text-8xl">
               商店
             </h1>
-            <p className="text-brand-500 font-serif italic text-lg max-w-md uppercase tracking-wider mb-8">
+            <p className="mb-8 max-w-full break-words font-serif text-base italic tracking-wide text-brand-500 md:max-w-md md:text-lg md:uppercase md:tracking-wider">
               Free of fast fashion, built for longevity.
             </p>
             <div className="h-px bg-brand-300 w-16 mb-8"></div>
@@ -80,9 +80,9 @@ export default function Shop() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            className="w-full md:w-1/2 mt-16 md:mt-0 flex justify-center md:justify-end"
+            className="mt-12 flex w-full justify-center md:mt-0 md:w-1/2 md:justify-end"
           >
-             <div className="relative w-full max-w-[400px] aspect-[3/4] rounded-t-full overflow-hidden border-4 border-brand-100 shadow-2xl">
+             <div className="relative aspect-[3/4] w-full max-w-[320px] overflow-hidden rounded-t-full border-4 border-brand-100 shadow-2xl sm:max-w-[400px]">
                 <img 
                   src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1000&auto=format&fit=crop" 
                   className="w-full h-full object-cover bg-brand-200" 
@@ -94,9 +94,9 @@ export default function Shop() {
         </div>
 
         {/* Toolbar: Search, Filters, Sort */}
-        <div className="mt-16 mb-12 py-6 flex flex-col lg:flex-row justify-between items-center gap-6 border-b border-brand-200 pb-12">
+        <div className="mb-10 mt-12 flex flex-col items-stretch justify-between gap-6 border-b border-brand-200 py-6 pb-10 md:mb-12 md:mt-16 md:pb-12 lg:flex-row lg:items-center">
           {/* Search */}
-          <div className="w-full lg:w-auto flex-1 max-w-md">
+          <div className="w-full max-w-none flex-1 lg:w-auto lg:max-w-md">
             <div className="flex items-center bg-transparent border-b border-brand-400 py-3">
               <Search className="w-5 h-5 text-brand-900 mr-3" />
               <input
@@ -110,12 +110,12 @@ export default function Shop() {
           </div>
 
           {/* Categories */}
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex w-full flex-wrap justify-start gap-2 lg:w-auto lg:justify-center">
             {CATEGORIES.map(cat => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 sm:px-6 ${
                   activeCategory === cat 
                     ? 'bg-brand-900 text-brand-50 scale-105' 
                     : 'border border-brand-300 text-brand-700 hover:border-brand-900'
@@ -127,7 +127,7 @@ export default function Shop() {
           </div>
 
           {/* Sort */}
-          <div className="relative min-w-[160px]">
+          <div className="relative w-full min-w-0 sm:w-auto sm:min-w-[160px]">
              <select
                 className="w-full appearance-none bg-transparent border border-brand-300 rounded-full px-5 py-2.5 pr-10 text-sm font-medium outline-none text-brand-900 focus:border-brand-900 transition-colors cursor-pointer"
                 value={sortBy}
@@ -142,7 +142,7 @@ export default function Shop() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 md:gap-x-10 gap-y-16">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 md:grid-cols-3 md:gap-x-10 md:gap-y-16 lg:grid-cols-4">
           <AnimatePresence>
             {filteredAndSortedProducts.length > 0 ? (
               filteredAndSortedProducts.map((item, idx) => (
@@ -243,7 +243,7 @@ function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClo
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-6xl max-h-full h-auto md:h-[85vh] bg-brand-50 rounded-2xl md:rounded-3xl shadow-2xl flex flex-col md:flex-row relative overflow-hidden"
+        className="relative flex h-auto max-h-[92svh] w-full max-w-6xl flex-col overflow-y-auto rounded-2xl bg-brand-50 shadow-2xl md:h-[85vh] md:flex-row md:overflow-hidden md:rounded-3xl"
       >
         {/* Close Button */}
         <button 
@@ -254,7 +254,7 @@ function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClo
         </button>
 
         {/* Left Pane - Product Details (Dark Brand Theme) */}
-        <div className="w-full md:w-5/12 bg-brand-900 text-brand-50 p-8 md:p-12 lg:p-16 flex flex-col justify-center overflow-y-auto">
+        <div className="flex w-full flex-col justify-center overflow-y-auto bg-brand-900 p-6 text-brand-50 md:w-5/12 md:p-12 lg:p-16">
           
           <div className="space-y-6 md:space-y-8">
             <div>
@@ -293,14 +293,14 @@ function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClo
         </div>
 
         {/* Right Pane - Images */}
-        <div className="w-full md:w-7/12 bg-[#F9F7F4] flex p-6 md:p-12 relative items-center justify-center overflow-hidden min-h-[400px]">
+        <div className="relative flex min-h-[360px] w-full items-center justify-center overflow-hidden bg-[#F9F7F4] p-6 md:min-h-[400px] md:w-7/12 md:p-12">
            {/* Thumbnails */}
-           <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 md:gap-4 z-10">
+           <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-3 md:bottom-auto md:left-auto md:right-8 md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:flex-col md:gap-4">
               {product.thumbnails.map((thumb, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`w-12 h-16 md:w-16 md:h-20 rounded-md overflow-hidden transition-all duration-300 border-2 ${activeImageIdx === idx ? 'border-brand-900 shadow-md transform scale-110' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                  className={`h-14 w-11 overflow-hidden rounded-md border-2 transition-all duration-300 md:h-20 md:w-16 ${activeImageIdx === idx ? 'border-brand-900 shadow-md transform scale-110' : 'border-transparent opacity-60 hover:opacity-100'}`}
                 >
                   <img src={thumb} className="w-full h-full object-cover" alt="thumbnail" referrerPolicy="no-referrer" />
                 </button>
@@ -318,7 +318,7 @@ function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClo
                 src={product.thumbnails[activeImageIdx]}
                 alt={product.name}
                 referrerPolicy="no-referrer"
-                className="w-full max-w-[80%] h-auto max-h-full object-contain filter drop-shadow-2xl"
+                className="h-auto max-h-full w-full max-w-[72%] object-contain drop-shadow-2xl md:max-w-[80%]"
              />
            </AnimatePresence>
         </div>

@@ -15,7 +15,7 @@ export function ConversationSidebar({
   onClose: () => void;
 }) {
   return (
-    <aside className="flex h-full w-72 shrink-0 flex-col border-r border-[#DECFBE] bg-[#FAF8F4]/95 p-4 backdrop-blur">
+    <aside className="flex h-full w-[min(18rem,88vw)] shrink-0 flex-col border-r border-[#DECFBE] bg-[#FAF8F4]/95 p-4 backdrop-blur">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <div className="text-sm font-medium text-[#362A1F]">对话列表</div>

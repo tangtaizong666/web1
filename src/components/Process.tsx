@@ -63,56 +63,86 @@ export default function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const media = gsap.matchMedia();
+
+    media.add('(min-width: 768px)', () => {
+      const ctx = gsap.context(() => {
       // Create a single main timeline scrubbed to the whole pinned section
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: `+=${steps.length * 100}%`,
-          pin: true,
-          scrub: 1,
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: `+=${steps.length * 100}%`,
+            pin: true,
+            scrub: 1,
+          },
+        });
+
+        // The time between steps
+        const duration = 1;
+
+        // Animate from step to step
+        for (let i = 1; i < steps.length; i++) {
+          // Timeline label for synchronization
+          const label = `step${i}`;
+        
+          // Hide previous text
+          tl.to(`.step-text-${i - 1}`, { opacity: 0, y: -30, duration, ease: "power2.inOut" }, label);
+        
+          // Hide previous visual (scale down / fade out)
+          tl.to(`.step-visual-${i - 1}`, { opacity: 0, scale: 0.8, duration, ease: "power2.inOut" }, label);
+        
+          // Show next text (from bottom up)
+          tl.fromTo(`.step-text-${i}`,
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration, ease: "power2.inOut" },
+            label,
+          );
+        
+          // Show next visual (expand / fade in)
+          tl.fromTo(`.step-visual-${i}`,
+            { opacity: 0, scale: 1.2 },
+            { opacity: 1, scale: 1, duration, ease: "power2.inOut" },
+            label,
+          );
         }
-      });
 
-      // The time between steps
-      const duration = 1;
+      }, containerRef);
 
-      // Animate from step to step
-      for(let i=1; i<steps.length; i++) {
-        // Timeline label for synchronization
-        const label = `step${i}`;
-        
-        // Hide previous text
-        tl.to(`.step-text-${i-1}`, { opacity: 0, y: -30, duration: duration, ease: "power2.inOut" }, label);
-        
-        // Hide previous visual (scale down / fade out)
-        tl.to(`.step-visual-${i-1}`, { opacity: 0, scale: 0.8, duration: duration, ease: "power2.inOut" }, label);
-        
-        // Show next text (from bottom up)
-        tl.fromTo(`.step-text-${i}`, 
-          { opacity: 0, y: 30 }, 
-          { opacity: 1, y: 0, duration: duration, ease: "power2.inOut" }, 
-          label
-        );
-        
-        // Show next visual (expand / fade in)
-        tl.fromTo(`.step-visual-${i}`, 
-          { opacity: 0, scale: 1.2 }, 
-          { opacity: 1, scale: 1, duration: duration, ease: "power2.inOut" }, 
-          label
-        );
-      }
+      return () => ctx.revert();
+    });
 
-    }, containerRef);
-
-    return () => ctx.revert();
+    return () => media.revert();
   }, []);
 
   return (
-    <section ref={containerRef} className="h-screen w-full flex kraft-texture text-brand-900 border-t border-brand-200">
+    <section ref={containerRef} className="w-full kraft-texture text-brand-900 border-t border-brand-200 md:flex md:h-screen">
+      <div className="space-y-5 px-5 py-20 md:hidden">
+        <div className="mb-10">
+          <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.3em] text-brand-500">
+            透明流程
+          </span>
+          <h2 className="font-serif text-4xl leading-tight text-brand-900">
+            旧衣从投递到新生
+          </h2>
+        </div>
+
+        {steps.map((step, i) => (
+          <div key={step.num} className="rounded-3xl border border-brand-200 bg-brand-50/80 p-5 shadow-sm">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-500">
+                {step.num} / {step.label}
+              </span>
+              {step.visual('h-10 w-10 shrink-0 text-brand-700')}
+            </div>
+            <h3 className="mb-4 font-serif text-3xl leading-none text-brand-900">{step.title}</h3>
+            <p className="text-base font-light italic leading-7 text-brand-700">{step.desc}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Left Column: Text (40%) */}
-      <div className="w-full md:w-[40%] h-full relative border-r border-brand-900/10">
+      <div className="hidden h-full w-full border-r border-brand-900/10 md:relative md:block md:w-[40%]">
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-10 md:px-20 h-96 flex flex-col justify-center">
           {steps.map((step, i) => (
             <div 

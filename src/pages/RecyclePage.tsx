@@ -176,7 +176,7 @@ export default function RecyclePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F5EE] relative overflow-hidden font-sans selection:bg-[#B58B66] selection:text-[#F8F5EE]">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#F8F5EE] font-sans selection:bg-[#B58B66] selection:text-[#F8F5EE]">
       {/* Warm Tea Aesthetic Background Elements */}
       <div className="absolute -top-40 -left-40 w-[800px] h-[800px] bg-gradient-to-br from-[#CDA885]/30 to-transparent blur-3xl rounded-full pointer-events-none" />
       <div className="absolute top-[20%] -right-32 w-[600px] h-[600px] bg-[#BB9D7E]/10 blur-[100px] rounded-full pointer-events-none" />
@@ -187,51 +187,52 @@ export default function RecyclePage() {
         style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }} 
       />
 
-      <div className="pt-8 px-6 md:px-12 lg:px-20 pb-32 relative z-10">
+      <div className="relative z-10 px-5 pb-24 pt-6 md:px-12 md:pb-32 md:pt-8 lg:px-20">
         {/* Top Nav */}
-        <nav className="mb-12 flex justify-between items-center max-w-7xl mx-auto">
+        <nav className="mx-auto mb-10 flex max-w-7xl items-center justify-between gap-4 overflow-hidden md:mb-12">
           <button 
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-[#7F6B58] hover:text-[#9A6D46] transition-colors font-serif italic text-lg shadow-sm"
+            className="flex min-w-0 items-center gap-2 font-serif text-base italic text-[#7F6B58] shadow-sm transition-colors hover:text-[#9A6D46] md:text-lg"
           >
             <ArrowLeft className="w-5 h-5" /> 返回首页
           </button>
-          <div className="font-serif italic text-xl tracking-widest text-[#4A3D30] border border-[#DECFBE] rounded-full px-5 py-1.5 bg-white/40 backdrop-blur-sm">
+          <div className="hidden max-w-[48vw] shrink-0 truncate rounded-full border border-[#DECFBE] bg-white/40 px-4 py-1.5 font-serif text-base italic tracking-widest text-[#4A3D30] backdrop-blur-sm sm:block md:max-w-none md:px-5 md:text-xl">
             Rennale Renuelly
           </div>
         </nav>
 
-        <main className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
+        <main className="mx-auto flex max-w-7xl min-w-0 flex-col items-start gap-10 lg:flex-row lg:gap-24">
           
           {/* Left Column - Retrieval Method */}
-          <div className="w-full lg:w-1/2 space-y-10">
+          <div className="w-full min-w-0 space-y-8 lg:w-1/2 lg:space-y-10">
             <div className="space-y-4">
-              <h1 className="text-5xl md:text-7xl font-serif text-[#362A1F] tracking-wider drop-shadow-sm">
+              <h1 className="font-serif text-4xl tracking-wider text-[#362A1F] drop-shadow-sm sm:text-5xl md:text-7xl">
                 归还流转
               </h1>
-              <p className="text-[#6C5B49] font-light leading-relaxed text-lg max-w-md">
+              <p className="max-w-full break-words text-sm font-light leading-7 text-[#6C5B49] [overflow-wrap:anywhere] sm:text-base md:max-w-md md:text-lg">
                 为旧衣物寻找新归宿。如同冲泡一壶散发着醇香的秋茶，静待新生的芬芳。您可以选择查找附近的终端，或预约上门。
               </p>
             </div>
 
             {/* Toggle Tabs */}
-            <div className="flex p-1.5 bg-[#EAE3D4]/60 rounded-full w-fit backdrop-blur-md border border-[#E0D5C1] shadow-inner">
+            <div className="grid w-full grid-cols-2 rounded-full border border-[#E0D5C1] bg-[#EAE3D4]/60 p-1.5 shadow-inner backdrop-blur-md sm:flex sm:w-fit">
                  <button 
                      onClick={() => setMethod('dropoff')}
-                     className={`px-8 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 ${method === 'dropoff' ? 'bg-[#986E4B] text-[#FDFBF7] shadow-md' : 'text-[#847463] hover:text-[#4A3D30]'}`}
+                     className={`min-w-0 rounded-full px-2 py-3 text-xs font-bold tracking-normal transition-all duration-300 sm:flex-none sm:px-8 sm:text-sm sm:tracking-wider ${method === 'dropoff' ? 'bg-[#986E4B] text-[#FDFBF7] shadow-md' : 'text-[#847463] hover:text-[#4A3D30]'}`}
                  >
                      智能箱投递
                  </button>
                  <button 
                      onClick={() => setMethod('pickup')}
-                     className={`px-8 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 ${method === 'pickup' ? 'bg-[#986E4B] text-[#FDFBF7] shadow-md' : 'text-[#847463] hover:text-[#4A3D30]'}`}
+                     className={`min-w-0 rounded-full px-2 py-3 text-xs font-bold tracking-normal transition-all duration-300 sm:flex-none sm:px-8 sm:text-sm sm:tracking-wider ${method === 'pickup' ? 'bg-[#986E4B] text-[#FDFBF7] shadow-md' : 'text-[#847463] hover:text-[#4A3D30]'}`}
                  >
-                     预约上门回收
+                     <span className="sm:hidden">上门回收</span>
+                     <span className="hidden sm:inline">预约上门回收</span>
                  </button>
             </div>
 
             {/* Form Content */}
-            <div className="h-[300px]">
+            <div className="min-h-[300px] lg:h-[300px]">
               <AnimatePresence mode="wait">
                  {method === 'dropoff' ? (
                      <motion.div 
@@ -258,7 +259,7 @@ export default function RecyclePage() {
                                     }}
                                      className="w-full min-w-0 py-4 px-5 outline-none text-[#362A1F] placeholder:text-[#BAAFA0] bg-transparent" 
                                    />
-                                   <div className="grid grid-cols-2 border-t border-[#DECFBE]">
+                                   <div className="grid grid-cols-1 border-t border-[#DECFBE] sm:grid-cols-2">
                                      <button
                                        onClick={() => void handleSearchLocation()}
                                        disabled={isSearchingLocation}
@@ -274,7 +275,7 @@ export default function RecyclePage() {
                                      <button
                                        onClick={() => handleAutoLocate('dropoff')}
                                        disabled={isLocating}
-                                       className="px-4 py-3.5 text-[#986E4B] hover:text-[#6C4B30] flex items-center justify-center gap-2 text-sm font-medium border-l border-[#DECFBE] bg-[#F4F0E8] transition-colors disabled:opacity-60 disabled:cursor-wait"
+                                       className="flex items-center justify-center gap-2 border-t border-[#DECFBE] bg-[#F4F0E8] px-4 py-3.5 text-sm font-medium text-[#986E4B] transition-colors hover:text-[#6C4B30] disabled:cursor-wait disabled:opacity-60 sm:border-l sm:border-t-0"
                                      >
                                        {isLocating ? (
                                          <LoaderCircle className="w-4 h-4 animate-spin" />
@@ -288,7 +289,7 @@ export default function RecyclePage() {
                          </div>
 
                          <div className="space-y-2">
-                           <div className="text-sm text-[#6C5B49]">
+                           <div className="max-w-full break-words text-sm leading-6 text-[#6C5B49] [overflow-wrap:anywhere]">
                              当前地图中心: <span className="font-medium text-[#362A1F]">{activeLocation.label}</span>
                            </div>
                            {locationError ? (
@@ -298,12 +299,12 @@ export default function RecyclePage() {
                            ) : null}
                          </div>
 
-                          <div className="bg-[#EAE3D4] text-[#4A3D30] rounded-3xl p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm mt-8 border border-[#DFD3BF] relative overflow-hidden">
+                          <div className="relative mt-8 flex flex-col items-start justify-between gap-6 overflow-hidden rounded-3xl border border-[#DFD3BF] bg-[#EAE3D4] p-5 text-[#4A3D30] shadow-sm sm:flex-row sm:items-center md:p-8">
                              <div className="absolute right-0 top-0 opacity-10 pointer-events-none">
                                 <Leaf className="w-32 h-32 transform rotate-12 translate-x-8 -translate-y-8 text-[#986E4B]" />
                              </div>
                              <div className="relative z-10">
-                                 <h4 className="font-serif italic text-xl mb-2 tracking-wide text-[#362A1F]">
+                                 <h4 className="mb-2 break-words font-serif text-lg italic tracking-wide text-[#362A1F] [overflow-wrap:anywhere] md:text-xl">
                                    周边共有 {nearbyBins.length} 个回收点，其中 {availableBins.length} 个可投递
                                  </h4>
                                  <p className="text-[#7F6B58] text-sm font-light">
@@ -340,7 +341,7 @@ export default function RecyclePage() {
                                         className="w-full outline-none text-[#362A1F] placeholder:text-[#BAAFA0] bg-transparent"
                                       />
                                     </div>
-                                    <div className="border-t border-[#DECFBE] bg-[#F4F0E8] px-4 py-3 flex items-center justify-between gap-3">
+                                    <div className="flex flex-col gap-3 border-t border-[#DECFBE] bg-[#F4F0E8] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                                       <div className="text-xs text-[#7F6B58]">可自动填入当前位置，方便预约上门回收。</div>
                                       <button
                                         type="button"
@@ -364,7 +365,7 @@ export default function RecyclePage() {
                                ) : null}
                            </div>
 
-                           <div className="grid grid-cols-2 gap-4 mt-4">
+                           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                <div className="space-y-3">
                                    <label className="text-xs text-[#986E4B] font-bold uppercase tracking-wider block">Date / 预约日期</label>
                                    <div className="flex items-center bg-[#FDFBF7] border border-[#DECFBE] rounded-xl px-4 py-3.5 shadow-sm focus-within:border-[#986E4B] transition-colors">
@@ -388,14 +389,14 @@ export default function RecyclePage() {
 
           {/* Right Column - Estimation */}
           <div className="w-full lg:w-1/2">
-              <div className="bg-[#FAF8F3]/80 backdrop-blur-2xl border border-[#E8DFC9] p-8 md:p-10 rounded-[2.5rem] shadow-[0_15px_40px_rgba(100,80,60,0.06)] relative overflow-hidden">
+              <div className="relative overflow-hidden rounded-[2rem] border border-[#E8DFC9] bg-[#FAF8F3]/80 p-5 shadow-[0_15px_40px_rgba(100,80,60,0.06)] backdrop-blur-2xl md:rounded-[2.5rem] md:p-10">
                  <h2 className="text-2xl font-serif text-[#362A1F] mb-8 border-b border-[#E8DFC9] pb-4">
                    物品预估 & 获取积分
                  </h2>
                  
                  <div className="space-y-8 relative z-10">
                      {/* Type & Qty */}
-                     <div className="flex flex-col sm:flex-row gap-6">
+                     <div className="flex flex-col gap-6 sm:flex-row">
                          <div className="flex-1">
                              <label className="text-xs mb-3 block text-[#986E4B] font-bold uppercase tracking-wider">Type / 服装类别</label>
                              <div className="relative">
@@ -424,7 +425,7 @@ export default function RecyclePage() {
                      {/* Condition */}
                      <div>
                           <label className="text-xs mb-4 block text-[#986E4B] font-bold uppercase tracking-wider">Condition / 物品状态评估</label>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                               {CONDITIONS.map(c => {
                                   const Icon = c.icon;
                                   return (
@@ -453,11 +454,11 @@ export default function RecyclePage() {
                      </div>
 
                      {/* Results */}
-                     <div className="mt-10 p-8 bg-[#F4F0E8] rounded-3xl border border-[#DECFBE] text-center relative overflow-hidden shadow-inner">
+                     <div className="relative mt-10 overflow-hidden rounded-3xl border border-[#DECFBE] bg-[#F4F0E8] p-5 text-center shadow-inner md:p-8">
                           <div className="text-[#986E4B] font-bold text-sm mb-3 tracking-widest uppercase">
                             预估可获积分
                           </div>
-                          <div className="text-5xl md:text-6xl font-serif text-[#362A1F] mb-6 tracking-wide">
+                          <div className="mb-6 font-serif text-4xl tracking-wide text-[#362A1F] md:text-6xl">
                               {minPoints} <span className="text-3xl text-[#BAAFA0] mx-2">-</span> {maxPoints}
                           </div>
                           
