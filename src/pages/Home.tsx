@@ -1,20 +1,17 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
-import Advantages from '../components/Advantages';
-import Workflow from '../components/Workflow';
-import Process from '../components/Process';
-import Showcase from '../components/Showcase';
-import FAQ from '../components/FAQ';
 import { Recycle, ShoppingBag, Heart, Sparkles } from 'lucide-react';
 import { AuthModal } from '../components/auth/AuthModal';
 import { useAuth } from '../hooks/useAuth';
 
-gsap.registerPlugin(ScrollTrigger);
+const Advantages = lazy(() => import('../components/Advantages'));
+const Workflow = lazy(() => import('../components/Workflow'));
+const Process = lazy(() => import('../components/Process'));
+const Showcase = lazy(() => import('../components/Showcase'));
+const FAQ = lazy(() => import('../components/FAQ'));
 
 export default function Home() {
   const lenisRef = useRef<Lenis | null>(null);
@@ -23,7 +20,9 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<'login' | 'register' | null>(null);
 
   useLayoutEffect(() => {
-    // Initialize Lenis
+    let frameId = 0;
+    let removeScrollTriggerSync: (() => void) | null = null;
+    let cancelled = false;
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -39,21 +38,28 @@ export default function Home() {
 
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      frameId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    frameId = requestAnimationFrame(raf);
 
-    // Sync GSAP with Lenis
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
+    void import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+      if (cancelled) {
+        return;
+      }
+
+      const updateScrollTrigger = () => ScrollTrigger.update();
+      lenis.on('scroll', updateScrollTrigger);
+      removeScrollTriggerSync = () => {
+        lenis.off('scroll', updateScrollTrigger);
+      };
     });
-    gsap.ticker.lagSmoothing(0);
 
     return () => {
+      cancelled = true;
+      cancelAnimationFrame(frameId);
+      removeScrollTriggerSync?.();
       lenis.destroy();
-      gsap.ticker.remove(raf);
     };
   }, []);
 
@@ -102,17 +108,19 @@ export default function Home() {
           </motion.p>
         </section>
 
-        <Advantages />
-        
-        {/* Cangxingchuangye.cc.cd style horizontal process */}
-        <Workflow />
+        <Suspense fallback={null}>
+          <Advantages />
+          
+          {/* Cangxingchuangye.cc.cd style horizontal process */}
+          <Workflow />
 
-        {/* Wonderwindows style Sticky Scroll Pinned Section */}
-        <Process />
+          {/* Wonderwindows style Sticky Scroll Pinned Section */}
+          <Process />
 
-        <Showcase />
+          <Showcase />
 
-        <FAQ />
+          <FAQ />
+        </Suspense>
 
         {/* Minimal High-End CTA */}
         <section className="negative-space">
