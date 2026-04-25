@@ -35,7 +35,11 @@ function useDesktopVideoAllowed() {
   return isDesktop;
 }
 
-export default function Hero() {
+type HeroProps = {
+  onPosterReady?: () => void;
+};
+
+export default function Hero({ onPosterReady }: HeroProps) {
   const container = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
@@ -61,7 +65,10 @@ export default function Hero() {
             alt="Campus Cycle hero poster"
             decoding="async"
             fetchPriority="high"
-            onLoad={() => setPosterLoaded(true)}
+            onLoad={() => {
+              setPosterLoaded(true);
+              onPosterReady?.();
+            }}
             className="absolute inset-0 h-full w-full object-cover opacity-75"
             style={{ scale: prefersReducedMotion ? 1 : 1.04 }}
           />

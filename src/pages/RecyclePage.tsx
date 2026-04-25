@@ -20,6 +20,7 @@ import RecycleMapModal, {
   type MapLocation,
   type RecycleBin,
 } from '../components/RecycleMapModal';
+import LocationPermissionDialog from '../components/LocationPermissionDialog';
 import { DEFAULT_MAP_LOCATION, RECYCLE_BIN_BLUEPRINTS } from '../data/recycle';
 
 const CLOTHING_TYPES = ["上衣", "裤装", "裙装", "外套", "鞋履包袋", "旧床单/其他面料"];
@@ -70,6 +71,7 @@ export default function RecyclePage() {
   const [locationError, setLocationError] = useState('');
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [pendingLocateTarget, setPendingLocateTarget] = useState<LocateTarget | null>(null);
 
   const [clothingType, setClothingType] = useState(CLOTHING_TYPES[0]);
   const [qty, setQty] = useState(1);
@@ -118,7 +120,25 @@ export default function RecyclePage() {
     setShowMap(true);
   };
 
-  const handleAutoLocate = (target: LocateTarget = 'dropoff') => {
+  const requestAutoLocate = (target: LocateTarget = 'dropoff') => {
+    setPendingLocateTarget(target);
+  };
+
+  const handleConfirmAutoLocate = () => {
+    const target = pendingLocateTarget ?? 'dropoff';
+    setPendingLocateTarget(null);
+    runAutoLocate(target);
+  };
+
+  const runAutoLocate = (target: LocateTarget = 'dropoff') => {
+    if (!canRequestBrowserGeolocation()) {
+      setLocationError('定位需要 HTTPS 安全环境。请先配置 HTTPS，或暂时手动输入位置。');
+      if (target === 'dropoff') {
+        setShowMap(true);
+      }
+      return;
+    }
+
     if (!navigator.geolocation) {
       setLocationError('当前浏览器不支持定位功能，请先手动输入位置。');
       if (target === 'dropoff') {
@@ -273,7 +293,8 @@ export default function RecyclePage() {
                                       搜索位置
                                     </button>
                                      <button
-                                       onClick={() => handleAutoLocate('dropoff')}
+                                       aria-label="申请自动定位"
+                                       onClick={() => requestAutoLocate('dropoff')}
                                        disabled={isLocating}
                                        className="flex items-center justify-center gap-2 border-t border-[#DECFBE] bg-[#F4F0E8] px-4 py-3.5 text-sm font-medium text-[#986E4B] transition-colors hover:text-[#6C4B30] disabled:cursor-wait disabled:opacity-60 sm:border-l sm:border-t-0"
                                      >
@@ -345,7 +366,8 @@ export default function RecyclePage() {
                                       <div className="text-xs text-[#7F6B58]">可自动填入当前位置，方便预约上门回收。</div>
                                       <button
                                         type="button"
-                                        onClick={() => handleAutoLocate('pickup')}
+                                        aria-label="申请上门地址自动定位"
+                                        onClick={() => requestAutoLocate('pickup')}
                                         disabled={isLocating}
                                         className="shrink-0 px-4 py-2 rounded-full border border-[#DECFBE] bg-[#FDFBF7] text-[#986E4B] hover:text-[#6C4B30] text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-60 disabled:cursor-wait"
                                       >
@@ -491,13 +513,23 @@ export default function RecyclePage() {
             isLocating={isLocating}
             isSearching={isSearchingLocation}
             locationQuery={addressSearch}
-            onAutoLocate={() => handleAutoLocate('dropoff')}
+            onAutoLocate={() => requestAutoLocate('dropoff')}
             onClose={() => setShowMap(false)}
             onQueryChange={setAddressSearch}
             onSearch={() => void handleSearchLocation()}
             userLocation={userLocation}
           />
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {pendingLocateTarget ? (
+          <LocationPermissionDialog
+            canRequestLocation={canRequestBrowserGeolocation()}
+            onCancel={() => setPendingLocateTarget(null)}
+            onConfirm={handleConfirmAutoLocate}
+          />
+        ) : null}
       </AnimatePresence>
     </div>
   );
@@ -592,6 +624,18 @@ function formatDistance(distanceMeters: number) {
   }
 
   return `${(distanceMeters / 1000).toFixed(distanceMeters < 3000 ? 1 : 0)} 公里`;
+}
+
+function canRequestBrowserGeolocation() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  if (window.isSecureContext) {
+    return true;
+  }
+
+  return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 }
 
 function getGeolocationErrorMessage(error: GeolocationPositionError) {

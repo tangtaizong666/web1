@@ -1,8 +1,9 @@
-import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import Lenis from 'lenis';
 import { useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
+import VinePageLoader from '../components/VinePageLoader';
 import { Recycle, ShoppingBag, Heart, Sparkles } from 'lucide-react';
 import { AuthModal } from '../components/auth/AuthModal';
 import { useAuth } from '../hooks/useAuth';
@@ -18,6 +19,33 @@ export default function Home() {
   const navigate = useNavigate();
   const { user, loginUser, registerUser, logoutUser } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register' | null>(null);
+  const [heroPosterReady, setHeroPosterReady] = useState(false);
+  const [loaderCycleDone, setLoaderCycleDone] = useState(false);
+  const [loaderTimedOut, setLoaderTimedOut] = useState(false);
+  const showPageLoader = !(loaderCycleDone && (heroPosterReady || loaderTimedOut));
+
+  useEffect(() => {
+    const cycleTimer = window.setTimeout(() => setLoaderCycleDone(true), 1850);
+    const fallbackTimer = window.setTimeout(() => setLoaderTimedOut(true), 6500);
+
+    return () => {
+      window.clearTimeout(cycleTimer);
+      window.clearTimeout(fallbackTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showPageLoader) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showPageLoader]);
 
   useLayoutEffect(() => {
     let frameId = 0;
@@ -65,6 +93,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-brand-100 selection:bg-brand-900 selection:text-brand-50">
+      <VinePageLoader isVisible={showPageLoader} />
+
       <div className="fixed left-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-brand-200 bg-brand-50/90 px-3 py-2 shadow-sm backdrop-blur">
         {user ? (
           <>
@@ -94,7 +124,7 @@ export default function Home() {
       ) : null}
 
       <main>
-        <Hero />
+        <Hero onPosterReady={() => setHeroPosterReady(true)} />
         
         {/* Oryzo-style Cinematic Break */}
         <section className="negative-space flex items-center justify-center text-center">

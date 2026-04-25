@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import gsap from 'gsap';
 import L from 'leaflet';
@@ -84,11 +84,24 @@ export default function RecycleMapModal({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
+  const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   const nearestBins = useMemo(
     () => bins.filter((bin) => bin.status === 'available').slice(0, 3),
     [bins],
   );
+
+  const invalidateMapSize = useCallback(() => {
+    const map = mapRef.current;
+
+    if (!map) {
+      return;
+    }
+
+    map.invalidateSize();
+    window.setTimeout(() => map.invalidateSize(), 120);
+    window.setTimeout(() => map.invalidateSize(), 360);
+  }, []);
 
   useLayoutEffect(() => {
     if (!surfaceRef.current) {
@@ -136,29 +149,46 @@ export default function RecycleMapModal({
 
     const map = L.map(mapContainerRef.current, {
       zoomControl: false,
+      dragging: true,
       scrollWheelZoom: true,
+      touchZoom: true,
+      doubleClickZoom: true,
+      keyboard: true,
+      zoomSnap: 0.25,
     });
 
     mapRef.current = map;
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+    });
+
+    tileLayer.on('load', () => setMapStatus('ready'));
+    tileLayer.on('tileerror', () => setMapStatus('error'));
+    tileLayer.addTo(map);
 
     markerLayerRef.current = L.layerGroup().addTo(map);
 
-    requestAnimationFrame(() => {
-      map.invalidateSize();
-    });
+    requestAnimationFrame(invalidateMapSize);
 
     return () => {
       map.remove();
       mapRef.current = null;
       markerLayerRef.current = null;
     };
-  }, []);
+  }, [invalidateMapSize]);
+
+  useEffect(() => {
+    window.addEventListener('resize', invalidateMapSize);
+    window.addEventListener('orientationchange', invalidateMapSize);
+
+    return () => {
+      window.removeEventListener('resize', invalidateMapSize);
+      window.removeEventListener('orientationchange', invalidateMapSize);
+    };
+  }, [invalidateMapSize]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -205,7 +235,7 @@ export default function RecycleMapModal({
     });
 
     requestAnimationFrame(() => {
-      map.invalidateSize();
+      invalidateMapSize();
 
       if (bounds.isValid()) {
         if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
@@ -215,14 +245,14 @@ export default function RecycleMapModal({
         }
       }
     });
-  }, [activeLocation, bins, userLocation]);
+  }, [activeLocation, bins, invalidateMapSize, userLocation]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#362A1F]/50 p-2 backdrop-blur-xl sm:p-6 md:p-8"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#362A1F]/50 p-0 backdrop-blur-xl sm:p-6 md:p-8"
       onClick={onClose}
     >
       <motion.div
@@ -230,12 +260,14 @@ export default function RecycleMapModal({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        onAnimationComplete={invalidateMapSize}
         onClick={(event) => event.stopPropagation()}
         ref={surfaceRef}
-        className="relative flex h-[94svh] w-full max-w-[min(1520px,96vw)] flex-col overflow-hidden rounded-2xl border border-[#DECFBE] bg-[#FDFBF7] shadow-[0_20px_50px_rgba(54,42,31,0.25)] md:h-[90vh] md:rounded-3xl"
+        className="relative flex h-[100svh] w-full max-w-none flex-col overflow-hidden rounded-none border border-[#DECFBE] bg-[#FDFBF7] shadow-[0_20px_50px_rgba(54,42,31,0.25)] sm:h-[94svh] sm:max-w-[min(1520px,96vw)] sm:rounded-2xl md:h-[90vh] md:rounded-3xl"
       >
         <motion.button
           onClick={onClose}
+          aria-label="关闭地图"
           whileHover={{ scale: 1.04, y: -1 }}
           whileTap={{ scale: 0.96 }}
           className="absolute right-3 top-3 z-50 rounded-full border border-[#DECFBE] bg-[#F4F0E8] p-2.5 text-[#4A3D30] shadow-sm transition-all hover:scale-105 hover:bg-[#EAE3D4] md:right-5 md:top-5"
@@ -280,11 +312,31 @@ export default function RecycleMapModal({
           ) : null}
         </div>
 
-        <div className="flex-1 relative bg-[#EAE3D4] overflow-hidden" data-map-panel>
+        <div className="relative min-h-[58svh] flex-1 bg-[#EAE3D4] overflow-hidden" data-map-panel>
           <div ref={mapContainerRef} className="absolute inset-0" />
           <div className="absolute inset-0 pointer-events-none mix-blend-overlay bg-[#986E4B]/5" />
 
-          <div className="pointer-events-none absolute inset-x-3 top-3 z-[500] flex flex-col gap-3 md:inset-x-4 md:top-4">
+          {mapStatus !== 'ready' ? (
+            <div className="pointer-events-none absolute inset-0 z-[450] flex items-center justify-center p-5">
+              <div className="max-w-xs rounded-3xl border border-[#DECFBE] bg-[rgba(253,251,247,0.94)] px-5 py-4 text-center shadow-[0_16px_36px_rgba(54,42,31,0.16)] backdrop-blur-xl">
+                {mapStatus === 'loading' ? (
+                  <>
+                    <LoaderCircle className="mx-auto mb-3 h-6 w-6 animate-spin text-[#986E4B]" />
+                    <div className="text-sm font-medium text-[#362A1F]">地图加载中</div>
+                    <div className="mt-1 text-xs leading-5 text-[#7F6B58]">正在连接地图瓦片服务</div>
+                  </>
+                ) : (
+                  <>
+                    <MapIcon className="mx-auto mb-3 h-6 w-6 text-[#A25344]" />
+                    <div className="text-sm font-medium text-[#362A1F]">地图暂时没有加载出来</div>
+                    <div className="mt-1 text-xs leading-5 text-[#7F6B58]">可以刷新页面，或先手动输入位置继续预约。</div>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="pointer-events-none absolute inset-x-3 top-3 z-[500] md:inset-x-4 md:top-4">
             <div
               className="pointer-events-auto w-full max-w-[840px] overflow-hidden rounded-2xl border border-[#DECFBE] bg-[rgba(253,251,247,0.92)] shadow-[0_18px_40px_rgba(54,42,31,0.12)] backdrop-blur-xl"
               data-map-panel
@@ -320,6 +372,7 @@ export default function RecycleMapModal({
                   </motion.button>
                   <motion.button
                     onClick={onAutoLocate}
+                    aria-label="申请自动定位"
                     disabled={isLocating}
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.98 }}
@@ -335,9 +388,11 @@ export default function RecycleMapModal({
                 </div>
               </div>
             </div>
+          </div>
 
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 z-[500] flex justify-end md:inset-x-4 md:bottom-4">
             <div
-              className="pointer-events-auto ml-auto max-h-[min(32vh,260px)] w-full max-w-full overflow-auto rounded-2xl border border-[#DECFBE] bg-[rgba(253,251,247,0.9)] p-3 shadow-[0_18px_40px_rgba(54,42,31,0.12)] backdrop-blur-xl md:max-h-[min(42vh,360px)] md:w-[300px] md:p-4"
+              className="pointer-events-auto max-h-[min(24svh,210px)] w-full max-w-[420px] overflow-auto rounded-2xl border border-[#DECFBE] bg-[rgba(253,251,247,0.9)] p-3 shadow-[0_18px_40px_rgba(54,42,31,0.12)] backdrop-blur-xl md:max-h-[min(42vh,360px)] md:w-[300px] md:p-4"
               data-map-panel
             >
               <div className="text-xs uppercase tracking-[0.24em] text-[#986E4B] font-bold mb-3">
@@ -379,6 +434,11 @@ export default function RecycleMapModal({
             border-color: #decfbe;
           }
 
+          .leaflet-control-zoom {
+            border: 1px solid rgba(222, 207, 190, 0.9);
+            box-shadow: 0 12px 28px rgba(54, 42, 31, 0.16);
+          }
+
           .leaflet-control-attribution {
             background: rgba(253, 251, 247, 0.92);
             color: #7f6b58;
@@ -409,6 +469,19 @@ export default function RecycleMapModal({
             height: 18px;
             background: #d6c8b8;
             border: 3px solid rgba(253, 251, 247, 0.95);
+          }
+
+          @media (max-width: 767px) {
+            .leaflet-control-zoom a {
+              width: 44px;
+              height: 44px;
+              line-height: 44px;
+              font-size: 22px;
+            }
+
+            .leaflet-bottom.leaflet-right {
+              bottom: 226px;
+            }
           }
         `}</style>
       </motion.div>
