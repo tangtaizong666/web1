@@ -127,9 +127,9 @@ export default function Hero() {
                 transform: 'translateZ(0)',
               }}
             >
-              Cycle.
+              CYCLE
               <br />
-              <span className="italic font-light lowercase tracking-tighter text-brand-200">新生。</span>
+              <span className="block w-full text-center italic font-light tracking-normal text-brand-200">新生</span>
             </h1>
 
             <p className="mx-auto max-w-[20rem] text-base font-light italic leading-8 tracking-wide text-brand-100 md:max-w-2xl md:text-2xl">
