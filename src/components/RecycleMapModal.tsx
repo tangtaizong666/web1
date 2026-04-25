@@ -98,9 +98,15 @@ export default function RecycleMapModal({
       return;
     }
 
-    map.invalidateSize();
-    window.setTimeout(() => map.invalidateSize(), 120);
-    window.setTimeout(() => map.invalidateSize(), 360);
+    const invalidateCurrentMap = () => {
+      if (mapRef.current === map) {
+        map.invalidateSize();
+      }
+    };
+
+    invalidateCurrentMap();
+    window.setTimeout(invalidateCurrentMap, 120);
+    window.setTimeout(invalidateCurrentMap, 360);
   }, []);
 
   useLayoutEffect(() => {
@@ -165,8 +171,16 @@ export default function RecycleMapModal({
       attribution: '&copy; OpenStreetMap contributors',
     });
 
-    tileLayer.on('load', () => setMapStatus('ready'));
-    tileLayer.on('tileerror', () => setMapStatus('error'));
+    tileLayer.on('load', () => {
+      if (mapRef.current === map) {
+        setMapStatus('ready');
+      }
+    });
+    tileLayer.on('tileerror', () => {
+      if (mapRef.current === map) {
+        setMapStatus('error');
+      }
+    });
     tileLayer.addTo(map);
 
     markerLayerRef.current = L.layerGroup().addTo(map);
@@ -234,7 +248,11 @@ export default function RecycleMapModal({
       bounds.extend([bin.lat, bin.lng]);
     });
 
-    requestAnimationFrame(() => {
+    const frameId = requestAnimationFrame(() => {
+      if (mapRef.current !== map) {
+        return;
+      }
+
       invalidateMapSize();
 
       if (bounds.isValid()) {
@@ -245,6 +263,10 @@ export default function RecycleMapModal({
         }
       }
     });
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
   }, [activeLocation, bins, invalidateMapSize, userLocation]);
 
   return (
