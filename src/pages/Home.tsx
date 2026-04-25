@@ -19,18 +19,36 @@ export default function Home() {
   const navigate = useNavigate();
   const { user, loginUser, registerUser, logoutUser } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register' | null>(null);
-  const [heroPosterReady, setHeroPosterReady] = useState(false);
+  const [heroReady, setHeroReady] = useState(false);
+  const [windowLoaded, setWindowLoaded] = useState(() => {
+    if (typeof document === 'undefined') {
+      return false;
+    }
+
+    return document.readyState === 'complete';
+  });
   const [loaderCycleDone, setLoaderCycleDone] = useState(false);
-  const [loaderTimedOut, setLoaderTimedOut] = useState(false);
-  const showPageLoader = !(loaderCycleDone && (heroPosterReady || loaderTimedOut));
+  const showPageLoader = !(windowLoaded && heroReady && loaderCycleDone);
 
   useEffect(() => {
     const cycleTimer = window.setTimeout(() => setLoaderCycleDone(true), 1850);
-    const fallbackTimer = window.setTimeout(() => setLoaderTimedOut(true), 6500);
 
     return () => {
       window.clearTimeout(cycleTimer);
-      window.clearTimeout(fallbackTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (document.readyState === 'complete') {
+      setWindowLoaded(true);
+      return;
+    }
+
+    const handleWindowLoad = () => setWindowLoaded(true);
+    window.addEventListener('load', handleWindowLoad, { once: true });
+
+    return () => {
+      window.removeEventListener('load', handleWindowLoad);
     };
   }, []);
 
@@ -124,7 +142,7 @@ export default function Home() {
       ) : null}
 
       <main>
-        <Hero onPosterReady={() => setHeroPosterReady(true)} />
+        <Hero onHeroReady={() => setHeroReady(true)} />
         
         {/* Oryzo-style Cinematic Break */}
         <section className="negative-space flex items-center justify-center text-center">

@@ -36,11 +36,13 @@ function useDesktopVideoAllowed() {
 }
 
 type HeroProps = {
+  onHeroReady?: () => void;
   onPosterReady?: () => void;
 };
 
-export default function Hero({ onPosterReady }: HeroProps) {
+export default function Hero({ onHeroReady, onPosterReady }: HeroProps) {
   const container = useRef<HTMLDivElement>(null);
+  const didNotifyHeroReady = useRef(false);
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const desktopVideoAllowed = useDesktopVideoAllowed();
@@ -55,6 +57,16 @@ export default function Hero({ onPosterReady }: HeroProps) {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const shouldLoadVideo = posterLoaded && desktopVideoAllowed && prefersReducedMotion !== true;
+  const heroMediaReady = posterLoaded && (!shouldLoadVideo || videoLoaded);
+
+  useEffect(() => {
+    if (!heroMediaReady || didNotifyHeroReady.current) {
+      return;
+    }
+
+    didNotifyHeroReady.current = true;
+    onHeroReady?.();
+  }, [heroMediaReady, onHeroReady]);
 
   return (
     <section ref={container} className="relative h-[160vh] overflow-hidden bg-brand-900 md:h-[200vh]">

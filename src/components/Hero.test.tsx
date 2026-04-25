@@ -43,4 +43,51 @@ describe('Hero', () => {
 
     expect(handlePosterReady).toHaveBeenCalledTimes(1);
   });
+
+  it('waits for the desktop video iframe before notifying that the hero is ready', () => {
+    const handleHeroReady = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <Hero onHeroReady={handleHeroReady} />
+      </MemoryRouter>,
+    );
+
+    fireEvent.load(screen.getByRole('img', { name: 'Campus Cycle hero poster' }));
+
+    expect(handleHeroReady).not.toHaveBeenCalled();
+
+    fireEvent.load(screen.getByTitle('Campus Cycle background video'));
+
+    expect(handleHeroReady).toHaveBeenCalledTimes(1);
+  });
+
+  it('notifies that the hero is ready after the poster on mobile', () => {
+    const originalMatchMedia = window.matchMedia;
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    });
+    const handleHeroReady = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <Hero onHeroReady={handleHeroReady} />
+      </MemoryRouter>,
+    );
+
+    fireEvent.load(screen.getByRole('img', { name: 'Campus Cycle hero poster' }));
+
+    expect(screen.queryByTitle('Campus Cycle background video')).toBeNull();
+    expect(handleHeroReady).toHaveBeenCalledTimes(1);
+
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: originalMatchMedia,
+    });
+  });
 });
