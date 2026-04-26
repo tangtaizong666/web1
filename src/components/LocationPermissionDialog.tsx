@@ -5,12 +5,14 @@ type LocationPermissionDialogProps = {
   canRequestLocation: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  onManualFallback?: () => void;
 };
 
 export default function LocationPermissionDialog({
   canRequestLocation,
   onCancel,
   onConfirm,
+  onManualFallback,
 }: LocationPermissionDialogProps) {
   return (
     <motion.div
@@ -54,7 +56,7 @@ export default function LocationPermissionDialog({
           </p>
         ) : (
           <p className="mt-4 text-sm leading-7 text-[#A25344]">
-            当前页面不是 HTTPS 安全环境，浏览器通常不会开放定位权限。请先配置 HTTPS，或者暂时手动输入位置继续使用。
+            当前页面不是 HTTPS 安全环境，浏览器不会开放精确定位。你可以先打开地图手动搜索，配置 HTTPS 后这里会自动弹出系统定位授权。
           </p>
         )}
 
@@ -64,7 +66,7 @@ export default function LocationPermissionDialog({
             onClick={onCancel}
             className="rounded-full border border-[#DECFBE] px-5 py-3 text-sm font-medium text-[#6C5B49] transition-colors hover:bg-[#F4F0E8]"
           >
-            {canRequestLocation ? '取消' : '我知道了'}
+            {canRequestLocation ? '取消' : '稍后再说'}
           </button>
           {canRequestLocation ? (
             <button
@@ -73,6 +75,14 @@ export default function LocationPermissionDialog({
               className="rounded-full bg-[#8E6545] px-5 py-3 text-sm font-semibold text-[#FDFBF7] shadow-[0_8px_20px_rgba(142,101,69,0.22)] transition-colors hover:bg-[#6C4B30]"
             >
               允许定位
+            </button>
+          ) : onManualFallback ? (
+            <button
+              type="button"
+              onClick={onManualFallback}
+              className="rounded-full bg-[#8E6545] px-5 py-3 text-sm font-semibold text-[#FDFBF7] shadow-[0_8px_20px_rgba(142,101,69,0.22)] transition-colors hover:bg-[#6C4B30]"
+            >
+              打开地图手动输入
             </button>
           ) : null}
         </div>
