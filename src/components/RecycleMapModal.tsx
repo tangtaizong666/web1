@@ -67,6 +67,10 @@ const fullBinIcon = L.divIcon({
   html: '<span class="recycle-map-pin recycle-map-pin--full"></span>',
 });
 
+const FAST_TILE_LAYER_URL =
+  'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}';
+const FALLBACK_TILE_LAYER_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
 export default function RecycleMapModal({
   activeLocation,
   userLocation,
@@ -84,6 +88,8 @@ export default function RecycleMapModal({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
+  const hasLoadedTileRef = useRef(false);
+  const usingFallbackTileRef = useRef(false);
   const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   const nearestBins = useMemo(
@@ -157,9 +163,10 @@ export default function RecycleMapModal({
       zoomControl: false,
       dragging: true,
       scrollWheelZoom: true,
-      touchZoom: true,
+      touchZoom: 'center',
       doubleClickZoom: true,
       keyboard: true,
+      preferCanvas: true,
       zoomSnap: 0.25,
     });
 
@@ -167,20 +174,45 @@ export default function RecycleMapModal({
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    });
-
-    tileLayer.on('load', () => {
+    const markMapReady = () => {
       if (mapRef.current === map) {
+        hasLoadedTileRef.current = true;
         setMapStatus('ready');
       }
-    });
-    tileLayer.on('tileerror', () => {
-      if (mapRef.current === map) {
+    };
+
+    const attachTileLayerEvents = (layer: L.TileLayer, isFallbackLayer = false) => {
+      layer.on('tileload', markMapReady);
+      layer.on('load', markMapReady);
+      layer.on('tileerror', () => {
+        if (mapRef.current !== map || hasLoadedTileRef.current) {
+          return;
+        }
+
+        if (!isFallbackLayer && !usingFallbackTileRef.current) {
+          usingFallbackTileRef.current = true;
+          map.removeLayer(layer);
+
+          const fallbackLayer = L.tileLayer(FALLBACK_TILE_LAYER_URL, {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19,
+          });
+          attachTileLayerEvents(fallbackLayer, true);
+          fallbackLayer.addTo(map);
+          return;
+        }
+
         setMapStatus('error');
-      }
+      });
+    };
+
+    const tileLayer = L.tileLayer(FAST_TILE_LAYER_URL, {
+      attribution: '&copy; 高德地图',
+      maxZoom: 18,
+      subdomains: ['1', '2', '3', '4'],
     });
+
+    attachTileLayerEvents(tileLayer);
     tileLayer.addTo(map);
 
     markerLayerRef.current = L.layerGroup().addTo(map);
@@ -191,6 +223,8 @@ export default function RecycleMapModal({
       map.remove();
       mapRef.current = null;
       markerLayerRef.current = null;
+      hasLoadedTileRef.current = false;
+      usingFallbackTileRef.current = false;
     };
   }, [invalidateMapSize]);
 
@@ -285,7 +319,8 @@ export default function RecycleMapModal({
         onAnimationComplete={invalidateMapSize}
         onClick={(event) => event.stopPropagation()}
         ref={surfaceRef}
-        className="relative flex h-[100svh] w-full max-w-none flex-col overflow-hidden rounded-none border border-[#DECFBE] bg-[#FDFBF7] shadow-[0_20px_50px_rgba(54,42,31,0.25)] sm:h-[94svh] sm:max-w-[min(1520px,96vw)] sm:rounded-2xl md:h-[90vh] md:rounded-3xl"
+        data-testid="recycle-map-modal"
+        className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-none flex-col overflow-hidden rounded-none border border-[#DECFBE] bg-[#FDFBF7] shadow-[0_20px_50px_rgba(54,42,31,0.25)] sm:h-[94svh] sm:max-w-[min(1520px,96vw)] sm:rounded-2xl md:h-[90vh] md:rounded-3xl"
       >
         <motion.button
           onClick={onClose}
@@ -334,8 +369,8 @@ export default function RecycleMapModal({
           ) : null}
         </div>
 
-        <div className="relative min-h-[58svh] flex-1 bg-[#EAE3D4] overflow-hidden" data-map-panel>
-          <div ref={mapContainerRef} className="absolute inset-0" />
+        <div className="relative min-h-0 flex-1 overflow-hidden bg-[#EAE3D4]" data-map-panel>
+          <div ref={mapContainerRef} data-testid="recycle-map-canvas" className="absolute inset-0 h-full min-h-[520px] md:min-h-0" />
           <div className="absolute inset-0 pointer-events-none mix-blend-overlay bg-[#986E4B]/5" />
 
           {mapStatus !== 'ready' ? (
