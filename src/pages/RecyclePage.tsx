@@ -48,6 +48,114 @@ const CONDITIONS = [
   },
 ];
 
+const FAST_LOCATION_INDEX: Array<MapLocation & { keywords: string[] }> = [
+  {
+    lat: 22.5333,
+    lng: 113.9367,
+    label: '深圳大学粤海校区',
+    source: 'search',
+    keywords: ['深圳大学', '深大', '粤海校区'],
+  },
+  {
+    lat: 22.5431,
+    lng: 114.0579,
+    label: '深圳市中心',
+    source: 'search',
+    keywords: ['深圳', '福田', '南山', '罗湖'],
+  },
+  {
+    lat: 23.1291,
+    lng: 113.2644,
+    label: '广州市中心',
+    source: 'search',
+    keywords: ['广州', '天河', '越秀'],
+  },
+  {
+    lat: 39.9042,
+    lng: 116.4074,
+    label: '北京市中心',
+    source: 'search',
+    keywords: ['北京', '朝阳', '三里屯'],
+  },
+  {
+    lat: 40.0007,
+    lng: 116.3266,
+    label: '清华大学',
+    source: 'search',
+    keywords: ['清华', '清华大学'],
+  },
+  {
+    lat: 39.9928,
+    lng: 116.3055,
+    label: '北京大学',
+    source: 'search',
+    keywords: ['北大', '北京大学'],
+  },
+  {
+    lat: 31.2304,
+    lng: 121.4737,
+    label: '上海市中心',
+    source: 'search',
+    keywords: ['上海', '黄浦', '浦东'],
+  },
+  {
+    lat: 31.2976,
+    lng: 121.5033,
+    label: '复旦大学',
+    source: 'search',
+    keywords: ['复旦', '复旦大学'],
+  },
+  {
+    lat: 30.2741,
+    lng: 120.1551,
+    label: '杭州市中心',
+    source: 'search',
+    keywords: ['杭州', '西湖', '浙江大学', '浙大'],
+  },
+  {
+    lat: 30.5728,
+    lng: 104.0668,
+    label: '成都市中心',
+    source: 'search',
+    keywords: ['成都', '四川大学', '川大'],
+  },
+  {
+    lat: 30.5928,
+    lng: 114.3055,
+    label: '武汉市中心',
+    source: 'search',
+    keywords: ['武汉', '武汉大学', '武大'],
+  },
+  {
+    lat: 32.0603,
+    lng: 118.7969,
+    label: '南京市中心',
+    source: 'search',
+    keywords: ['南京', '南京大学', '南大'],
+  },
+  {
+    lat: 34.3416,
+    lng: 108.9398,
+    label: '西安市中心',
+    source: 'search',
+    keywords: ['西安', '西安交通大学', '西交大'],
+  },
+  {
+    lat: 29.563,
+    lng: 106.5516,
+    label: '重庆市中心',
+    source: 'search',
+    keywords: ['重庆'],
+  },
+  {
+    lat: 22.3193,
+    lng: 114.1694,
+    label: '香港',
+    source: 'search',
+    keywords: ['香港', '中国香港'],
+  },
+];
+
 type NominatimSearchResult = {
   lat: string;
   lon: string;
@@ -94,6 +202,20 @@ export default function RecyclePage() {
       return;
     }
 
+    const fallbackBase = mapLocation ?? userLocation ?? DEFAULT_MAP_LOCATION;
+    const fastLocation = findFastLocation(query);
+    const provisionalLocation: MapLocation =
+      fastLocation ??
+      {
+        lat: fallbackBase.lat,
+        lng: fallbackBase.lng,
+        label: `${query}附近`,
+        source: 'search',
+      };
+
+    setMapLocation(provisionalLocation);
+    setAddressSearch(provisionalLocation.label);
+    setShowMap(true);
     setIsSearchingLocation(true);
     setLocationError('');
 
@@ -103,7 +225,9 @@ export default function RecyclePage() {
       setAddressSearch(result.label);
       setShowMap(true);
     } catch (error) {
-      setLocationError(getErrorMessage(error, '没有找到这个位置，请换一个更具体的关键词。'));
+      setLocationError(
+        getErrorMessage(error, '外部地图搜索响应较慢，已先打开地图。你可以换更具体的位置继续搜索。'),
+      );
       setShowMap(true);
     } finally {
       setIsSearchingLocation(false);
@@ -128,6 +252,16 @@ export default function RecyclePage() {
     const target = pendingLocateTarget ?? 'dropoff';
     setPendingLocateTarget(null);
     runAutoLocate(target);
+  };
+
+  const handleManualLocateFallback = () => {
+    const target = pendingLocateTarget ?? 'dropoff';
+    setPendingLocateTarget(null);
+    setLocationError('当前网页不是 HTTPS，暂时不能使用手机精确定位。你可以先在地图里手动搜索位置。');
+
+    if (target === 'dropoff') {
+      setShowMap(true);
+    }
   };
 
   const runAutoLocate = (target: LocateTarget = 'dropoff') => {
@@ -528,11 +662,35 @@ export default function RecyclePage() {
             canRequestLocation={canRequestBrowserGeolocation()}
             onCancel={() => setPendingLocateTarget(null)}
             onConfirm={handleConfirmAutoLocate}
+            onManualFallback={handleManualLocateFallback}
           />
         ) : null}
       </AnimatePresence>
     </div>
   );
+}
+
+function findFastLocation(query: string): MapLocation | null {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return null;
+  }
+
+  const matchedLocation = FAST_LOCATION_INDEX.find((location) =>
+    location.keywords.some((keyword) => normalizedQuery.includes(keyword.toLowerCase())),
+  );
+
+  if (!matchedLocation) {
+    return null;
+  }
+
+  return {
+    lat: matchedLocation.lat,
+    lng: matchedLocation.lng,
+    label: matchedLocation.label,
+    source: matchedLocation.source,
+  };
 }
 
 function buildNearbyBins(center: MapLocation): RecycleBin[] {
@@ -552,15 +710,30 @@ function buildNearbyBins(center: MapLocation): RecycleBin[] {
   }).sort((left, right) => left.distanceMeters - right.distanceMeters);
 }
 
-async function geocodeLocation(query: string): Promise<MapLocation> {
-  const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`,
-    {
-      headers: {
-        'Accept-Language': 'zh-CN',
+async function geocodeLocation(query: string, timeoutMs = 3500): Promise<MapLocation> {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  let response: Response;
+
+  try {
+    response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          'Accept-Language': 'zh-CN',
+        },
+        signal: controller.signal,
       },
-    },
-  );
+    );
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('地图搜索服务响应较慢，已先显示一个可用地图。');
+    }
+
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     throw new Error('地图服务暂时不可用，请稍后再试。');
