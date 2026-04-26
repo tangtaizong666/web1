@@ -1,51 +1,44 @@
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { createElement, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Recycle, ShoppingBag, Sparkles } from 'lucide-react';
 
 const MUX_PLAYBACK_ID = 'VPgqHsW01gQWsfKJcgItYfkeyYYIvJ4DubLbEChs8Tsg';
 const HERO_POSTER_URL = `https://image.mux.com/${MUX_PLAYBACK_ID}/thumbnail.webp?width=1600&height=1000&fit_mode=crop&time=1`;
-const HERO_VIDEO_URL = `https://player.mux.com/${MUX_PLAYBACK_ID}?autoplay=muted&loop=true&muted=true&controls=false&playsinline=true`;
+const MUX_PLAYER_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/@mux/mux-player@3/dist/mux-player.mjs';
 
-function useDesktopVideoAllowed() {
-  const [isDesktop, setIsDesktop] = useState(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) {
-      return true;
-    }
+function ensureMuxPlayerScript() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
 
-    return window.matchMedia('(min-width: 768px)').matches;
-  });
+  if (window.customElements?.get('mux-player')) {
+    return;
+  }
 
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) {
-      return;
-    }
+  if (document.querySelector(`script[src="${MUX_PLAYER_SCRIPT_URL}"]`)) {
+    return;
+  }
 
-    const mediaQuery = window.matchMedia('(min-width: 768px)');
-    const updateDesktopState = () => setIsDesktop(mediaQuery.matches);
-
-    updateDesktopState();
-    mediaQuery.addEventListener?.('change', updateDesktopState);
-
-    return () => {
-      mediaQuery.removeEventListener?.('change', updateDesktopState);
-    };
-  }, []);
-
-  return isDesktop;
+  const script = document.createElement('script');
+  script.type = 'module';
+  script.src = MUX_PLAYER_SCRIPT_URL;
+  script.async = true;
+  document.head.appendChild(script);
 }
 
 type HeroProps = {
   onHeroReady?: () => void;
+  onHeroError?: () => void;
   onPosterReady?: () => void;
 };
 
-export default function Hero({ onHeroReady, onPosterReady }: HeroProps) {
+export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroProps) {
   const container = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLElement | null>(null);
   const didNotifyHeroReady = useRef(false);
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
-  const desktopVideoAllowed = useDesktopVideoAllowed();
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const { scrollYProgress } = useScroll({
@@ -56,8 +49,34 @@ export default function Hero({ onHeroReady, onPosterReady }: HeroProps) {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const shouldLoadVideo = posterLoaded && desktopVideoAllowed && prefersReducedMotion !== true;
+  const shouldLoadVideo = posterLoaded && prefersReducedMotion !== true;
   const heroMediaReady = posterLoaded && (!shouldLoadVideo || videoLoaded);
+
+  useEffect(() => {
+    if (!shouldLoadVideo) {
+      return;
+    }
+
+    ensureMuxPlayerScript();
+  }, [shouldLoadVideo]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!shouldLoadVideo || !video) {
+      return;
+    }
+
+    const handlePlaying = () => setVideoLoaded(true);
+    const handleError = () => onHeroError?.();
+
+    video.addEventListener('playing', handlePlaying);
+    video.addEventListener('error', handleError);
+
+    return () => {
+      video.removeEventListener('playing', handlePlaying);
+      video.removeEventListener('error', handleError);
+    };
+  }, [onHeroError, shouldLoadVideo]);
 
   useEffect(() => {
     if (!heroMediaReady || didNotifyHeroReady.current) {
@@ -81,23 +100,41 @@ export default function Hero({ onHeroReady, onPosterReady }: HeroProps) {
               setPosterLoaded(true);
               onPosterReady?.();
             }}
-            className="absolute inset-0 h-full w-full object-cover opacity-75"
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+              videoLoaded ? 'opacity-0' : 'opacity-75'
+            }`}
             style={{ scale: prefersReducedMotion ? 1 : 1.04 }}
           />
 
-          {shouldLoadVideo ? (
-            <iframe
-              title="Campus Cycle background video"
-              src={HERO_VIDEO_URL}
-              onLoad={() => setVideoLoaded(true)}
-              className={`pointer-events-none absolute left-1/2 top-1/2 hidden h-[56.25vw] min-h-[100vh] min-w-[177.77vh] w-[100vw] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000 md:block ${
-                videoLoaded ? 'opacity-60' : 'opacity-0'
-              }`}
-              style={{ border: 'none' }}
-              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-            />
-          ) : null}
+          {shouldLoadVideo
+            ? createElement('mux-player', {
+                'playback-id': MUX_PLAYBACK_ID,
+                autoplay: 'muted',
+                muted: true,
+                loop: true,
+                playsinline: true,
+                preload: 'auto',
+                'stream-type': 'on-demand',
+                title: 'Campus Cycle background video',
+                ref: (node: HTMLElement | null) => {
+                  videoRef.current = node;
+                },
+                className: `pointer-events-none absolute left-1/2 top-1/2 h-[100svh] min-h-[100svh] min-w-[177.77svh] w-[177.77svh] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000 md:h-[56.25vw] md:min-h-[100vh] md:min-w-[177.77vh] md:w-[100vw] ${
+                  videoLoaded ? 'opacity-80' : 'opacity-0'
+                }`,
+                style: {
+                  '--controls': 'none',
+                  '--media-object-fit': 'cover',
+                  '--media-object-position': 'center',
+                  '--play-button': 'none',
+                  '--center-controls': 'none',
+                  '--bottom-controls': 'none',
+                  '--top-controls': 'none',
+                  '--loading-indicator': 'none',
+                  background: 'transparent',
+                },
+              })
+            : null}
 
           <div className="pointer-events-none absolute inset-0 -z-10 bg-brand-900 opacity-30 kraft-texture" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-900/35 via-brand-900/10 to-brand-900" />
