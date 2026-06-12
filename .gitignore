@@ -10,3 +10,4 @@ coverage/
 uploads/
 .idea/
 .vercel/
+*.tsbuildinfo

@@ -118,7 +118,9 @@
     <script>
       (function () {
         var start = Date.now();
-        var MIN_SHOW_MS = 700;
+        // Long enough for the 1s entrance animation plus a beat of dwell,
+        // so fast (cached/local) loads still get a composed opening.
+        var MIN_SHOW_MS = 1600;
         var el = document.getElementById('app-splash');
         function hide() {
           if (!el) return;

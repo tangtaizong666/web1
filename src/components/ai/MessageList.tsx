@@ -27,7 +27,7 @@ export function MessageList({
       <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-6">
         {messages.length === 0 ? (
           <div className="flex w-full flex-col items-start gap-3">
-            <div className="max-w-[88%] rounded-[1.5rem] border border-[#E3D8C4] bg-white/85 px-4 py-3 text-sm leading-relaxed text-[#362A1F] backdrop-blur-sm md:max-w-[80%] md:rounded-[2rem] md:px-5 md:py-4">
+            <div className="max-w-[88%] rounded-[1.5rem] border border-[#E3D8C4] bg-white/90 px-4 py-3 text-sm leading-relaxed text-[#362A1F] md:max-w-[80%] md:rounded-[2rem] md:px-5 md:py-4">
               你好，有什么需要帮助的吗？
             </div>
             <div className="flex max-w-[88%] flex-wrap gap-2 pl-1 md:max-w-[80%]">
@@ -54,7 +54,7 @@ export function MessageList({
               className={`max-w-[88%] rounded-[1.5rem] px-4 py-3 text-sm leading-relaxed [overflow-wrap:anywhere] md:max-w-[80%] md:rounded-[2rem] md:px-5 md:py-4 ${
                 message.role === 'user'
                   ? 'bg-[#986E4B] text-white shadow-[0_8px_24px_rgba(152,110,75,0.25)]'
-                  : 'border border-[#E3D8C4] bg-white/85 text-[#362A1F] backdrop-blur-sm'
+                  : 'border border-[#E3D8C4] bg-white/90 text-[#362A1F]'
               }`}
             >
               <div className={message.content === 'AI 正在思考...' ? 'animate-pulse text-[#A08D77]' : ''}>

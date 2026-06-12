@@ -55,6 +55,9 @@ export default function Showcase() {
             >
               <div className="aspect-[3/4] overflow-hidden bg-brand-800">
                 <motion.img
+                  initial={{ scale: 1.12 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true, margin: '-10%' }}
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
                   src={item.image}

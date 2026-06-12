@@ -122,6 +122,22 @@
     @apply px-5 py-20 md:px-12 md:py-[20vh] lg:px-20;
   }
   
+  /* Slow Ken Burns drift for the hero poster: keeps the first screen alive
+     while the video is still loading, or when autoplay is blocked (mobile
+     data saver / low-power mode). Overrides the inline scale while active. */
+  .hero-kenburns {
+    animation: hero-kenburns 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes hero-kenburns {
+    from { transform: scale(1.04); }
+    to { transform: scale(1.16); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-kenburns { animation: none; }
+  }
+
   .kraft-texture {
     background-color: var(--color-brand-100);
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/H0ZkAAAACHRSTlMA/////////9EwkUIAAAAlSURBVDjLxY3BEcMwCEPBz0kFcg3P/qt0GDAwlL7+JgKBhPD+4VnO+rZftb1Xy9n1a/vE3vGZ1L33uT+r18kS5yT2lK8+9/oHn5y4v85I+Nw+sXz3nN+799m8R61v027xHplY52P5yHPy5M995u/2P1H7D3L35s/J3+A9yP0/5u/7P3Lv7Tnm/yD3w5kH3M+55///IEdAAAAAElFTkSuQmCC");

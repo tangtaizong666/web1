@@ -63,7 +63,41 @@ export default function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Keep pinned positions stable while the mobile address bar collapses.
+    ScrollTrigger.config({ ignoreMobileResize: true });
+
     const media = gsap.matchMedia();
+
+    // Mobile gets the same pinned, scroll-driven theater in a vertical
+    // composition; users who prefer reduced motion see static cards instead.
+    media.add('(max-width: 767px) and (prefers-reduced-motion: no-preference)', () => {
+      const ctx = gsap.context(() => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.process-stage-m',
+            start: 'top top',
+            end: `+=${steps.length * 90}%`,
+            pin: true,
+            scrub: 1,
+          },
+        });
+
+        const duration = 1;
+
+        for (let i = 1; i < steps.length; i++) {
+          const label = `m-step${i}`;
+          tl.to(`.m-step-${i - 1}`, { opacity: 0, y: -36, duration, ease: 'power2.inOut' }, label);
+          tl.fromTo(
+            `.m-step-${i}`,
+            { opacity: 0, y: 36 },
+            { opacity: 1, y: 0, duration, ease: 'power2.inOut' },
+            label,
+          );
+        }
+      }, containerRef);
+
+      return () => ctx.revert();
+    });
 
     media.add('(min-width: 768px)', () => {
       const ctx = gsap.context(() => {
@@ -116,8 +150,31 @@ export default function Process() {
   }, []);
 
   return (
-    <section ref={containerRef} className="w-full kraft-texture text-brand-900 border-t border-brand-200 md:flex md:h-screen">
-      <div className="space-y-5 px-5 py-20 md:hidden">
+    <section ref={containerRef} className="w-full kraft-texture text-brand-900 border-t border-brand-200">
+      {/* Mobile: pinned scroll-driven theater, vertical composition */}
+      <div className="process-stage-m relative h-[100svh] overflow-hidden motion-reduce:hidden md:hidden">
+        {/* Soft center glow, echoing the desktop visual column */}
+        <div className="absolute left-1/2 top-1/2 h-[70vw] w-[70vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-50/50 opacity-50 blur-3xl" />
+
+        {steps.map((step, i) => (
+          <div
+            key={`m-${step.num}`}
+            className={`m-step-${i} absolute inset-0 flex flex-col items-center justify-center px-8 text-center ${
+              i === 0 ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <span className="mb-8 block text-[10px] font-bold uppercase tracking-[0.4em] text-brand-500">
+              {step.num} / {step.label}
+            </span>
+            {step.visual('mb-10 h-32 w-32 text-brand-800 drop-shadow-2xl')}
+            <h2 className="mb-6 font-serif text-4xl leading-tight tracking-tighter">{step.title}</h2>
+            <p className="max-w-sm text-base font-light italic leading-7 text-brand-700">{step.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Mobile fallback for reduced-motion users: plain stacked cards */}
+      <div className="hidden space-y-5 px-5 py-20 max-md:motion-reduce:block">
         <div className="mb-10">
           <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.3em] text-brand-500">
             透明流程
@@ -127,7 +184,7 @@ export default function Process() {
           </h2>
         </div>
 
-        {steps.map((step, i) => (
+        {steps.map((step) => (
           <div key={step.num} className="rounded-3xl border border-brand-200 bg-brand-50/80 p-5 shadow-sm">
             <div className="mb-5 flex items-center justify-between gap-4">
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-500">
@@ -141,6 +198,7 @@ export default function Process() {
         ))}
       </div>
 
+      <div className="hidden w-full md:flex md:h-screen">
       {/* Left Column: Text (40%) */}
       <div className="hidden h-full w-full border-r border-brand-900/10 md:relative md:block md:w-[40%]">
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-10 md:px-20 h-96 flex flex-col justify-center">
@@ -176,6 +234,7 @@ export default function Process() {
             {step.visual("w-64 h-64 text-brand-800 drop-shadow-2xl")}
           </div>
         ))}
+      </div>
       </div>
     </section>
   );

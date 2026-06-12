@@ -8,6 +8,11 @@ import { Recycle, ShoppingBag, Sparkles } from 'lucide-react';
 const HERO_POSTER_URL = '/images/hero-poster.webp';
 const HERO_VIDEO_URL = '/videos/hero.mp4';
 
+// The slow cinematic intro (text reveal, delayed buttons, long crossfade)
+// should only play on the first arrival; when the user navigates back to the
+// home page within the same session the hero must render settled right away.
+let heroIntroPlayed = false;
+
 type HeroProps = {
   onHeroReady?: () => void;
   onHeroError?: () => void;
@@ -17,12 +22,20 @@ type HeroProps = {
 export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroProps) {
   const container = useRef<HTMLDivElement>(null);
   const posterRef = useRef<HTMLImageElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const didNotifyHeroReady = useRef(false);
   const didMarkPosterLoaded = useRef(false);
+  const didNotifyAutoplayBlocked = useRef(false);
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
+  // Capture once at mount: state initializer, so re-renders keep the value.
+  const [skipIntro] = useState(heroIntroPlayed);
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+
+  useEffect(() => {
+    heroIntroPlayed = true;
+  }, []);
 
   const markPosterLoaded = () => {
     if (didMarkPosterLoaded.current) {
@@ -56,6 +69,39 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Mobile browsers (data saver, low-power mode, many Chinese Android
+  // browsers) often reject autoplay even for muted inline video. Kick off
+  // playback explicitly; if it is rejected, release the splash right away and
+  // retry once on the first user gesture, which lifts the autoplay block.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!shouldLoadVideo || !video) {
+      return;
+    }
+
+    let disposed = false;
+    const tryPlay = () => {
+      void video.play()?.catch(() => {
+        if (disposed || didNotifyAutoplayBlocked.current) {
+          return;
+        }
+        didNotifyAutoplayBlocked.current = true;
+        onHeroError?.();
+      });
+    };
+
+    tryPlay();
+    const retry = () => tryPlay();
+    window.addEventListener('touchend', retry, { once: true, passive: true });
+    window.addEventListener('pointerdown', retry, { once: true });
+
+    return () => {
+      disposed = true;
+      window.removeEventListener('touchend', retry);
+      window.removeEventListener('pointerdown', retry);
+    };
+  }, [shouldLoadVideo, onHeroError]);
+
   useEffect(() => {
     if (!heroMediaReady || didNotifyHeroReady.current) {
       return;
@@ -76,14 +122,17 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
             decoding="async"
             fetchPriority="high"
             onLoad={markPosterLoaded}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
-              videoLoaded ? 'opacity-0' : 'opacity-75'
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity ${
+              skipIntro ? 'duration-300' : 'duration-1000'
+            } ${videoLoaded ? 'opacity-0' : 'opacity-75'} ${
+              !videoLoaded && prefersReducedMotion !== true ? 'hero-kenburns' : ''
             }`}
             style={{ scale: prefersReducedMotion ? 1 : 1.04 }}
           />
 
           {shouldLoadVideo ? (
             <video
+              ref={videoRef}
               src={HERO_VIDEO_URL}
               autoPlay
               muted
@@ -93,9 +142,9 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
               aria-hidden="true"
               onPlaying={() => setVideoLoaded(true)}
               onError={() => onHeroError?.()}
-              className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
-                videoLoaded ? 'opacity-80' : 'opacity-0'
-              }`}
+              className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity ${
+                skipIntro ? 'duration-300' : 'duration-1000'
+              } ${videoLoaded ? 'opacity-80' : 'opacity-0'}`}
             />
           ) : null}
 
@@ -113,7 +162,7 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
               type="button"
               key={item.path}
               onClick={() => navigate(item.path)}
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={skipIntro ? false : { opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1 + idx * 0.1, duration: 0.8, ease: 'easeOut' }}
               className="group flex min-h-12 min-w-12 cursor-pointer items-center justify-center rounded-full border border-brand-50/30 bg-brand-50/10 p-3 backdrop-blur-md transition-all duration-500 hover:bg-brand-50/20 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] md:p-4"
@@ -129,7 +178,7 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
 
         <motion.div style={{ y: textY }} className="relative z-10 max-w-6xl px-5 text-center md:px-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={skipIntro ? false : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -160,7 +209,7 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={skipIntro ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
           className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-4 md:flex"

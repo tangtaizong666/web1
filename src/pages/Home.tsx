@@ -30,6 +30,9 @@ export default function Home() {
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
+      // Give touch the same buttery inertia as the desktop wheel, instead of
+      // the browser's plain native scrolling.
+      syncTouch: true,
       wheelMultiplier: 1,
       touchMultiplier: 2,
       infinite: false,

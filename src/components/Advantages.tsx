@@ -54,7 +54,15 @@ export default function Advantages() {
                 {adv.description}
               </p>
               
-              <div className="mt-10 w-0 group-hover:w-full h-[1px] bg-brand-900 transition-all duration-1000 origin-left" />
+              {/* Desktop reveals the rule on hover; touch screens reveal it on scroll. */}
+              <div className="mt-10 hidden h-[1px] w-0 origin-left bg-brand-900 transition-all duration-1000 group-hover:w-full md:block" />
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true, margin: '-15%' }}
+                transition={{ duration: 1.2, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="mt-10 h-[1px] w-full origin-left bg-brand-900 md:hidden"
+              />
             </motion.div>
           ))}
         </div>
