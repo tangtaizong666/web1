@@ -15,11 +15,11 @@ export function ConversationSidebar({
   onClose: () => void;
 }) {
   return (
-    <aside className="flex h-full w-[min(18rem,88vw)] shrink-0 flex-col border-r border-[#DECFBE] bg-[#FAF8F4]/95 p-4 backdrop-blur">
+    <aside className="flex h-full w-[min(18rem,88vw)] shrink-0 flex-col border-r border-[#E0D5C1] bg-[#FAF6ED]/95 p-4 backdrop-blur-md">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-sm font-medium text-[#362A1F]">对话列表</div>
-          <div className="text-xs text-[#7F6B58]">已保存的聊天会在这里显示</div>
+          <div className="font-serif text-base tracking-wide text-[#362A1F]">对话列表</div>
+          <div className="text-xs text-[#8A7866]">已保存的聊天会在这里显示</div>
         </div>
         <button
           type="button"
@@ -33,14 +33,14 @@ export function ConversationSidebar({
 
       <button
         onClick={onCreate}
-        className="mb-4 w-full rounded-xl border border-[#DECFBE] bg-white px-4 py-3 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA]"
+        className="mb-4 w-full rounded-xl border border-[#DECFBE] bg-white/80 px-4 py-3 text-sm text-[#362A1F] shadow-sm transition hover:bg-white"
       >
         新聊天
       </button>
 
       <div className="flex-1 space-y-2 overflow-y-auto">
         {conversations.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#DECFBE] bg-white/80 px-4 py-6 text-sm text-[#7F6B58]">
+          <div className="rounded-2xl border border-dashed border-[#DECFBE] bg-white/60 px-4 py-6 text-sm text-[#8A7866]">
             还没有历史对话，发出第一条消息后这里就会出现记录。
           </div>
         ) : null}
@@ -48,13 +48,13 @@ export function ConversationSidebar({
           <button
             key={conversation.id}
             onClick={() => onSelect(conversation.id)}
-            className={`w-full rounded-xl px-3 py-2 text-left text-sm ${
+            className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-colors ${
               activeConversationId === conversation.id
-                ? 'bg-[#EAE3D4]'
-                : 'bg-transparent hover:bg-[#F4F0E8]'
+                ? 'bg-[#986E4B]/15 text-[#362A1F]'
+                : 'bg-transparent text-[#5C4B3A] hover:bg-[#EFE7D6]'
             }`}
           >
-            <div className="truncate font-medium text-[#362A1F]">{conversation.title}</div>
+            <div className="truncate font-medium">{conversation.title}</div>
           </button>
         ))}
       </div>

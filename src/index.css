@@ -1,8 +1,42 @@
 @import "tailwindcss";
 
+/* Self-hosted fonts: no external font CDN so the site renders identically
+   on any judge's machine and network (Google Fonts is unreachable in CN). */
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/cormorant-garamond.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/cormorant-garamond-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter.woff2") format("woff2");
+}
+/* Subset of Noto Serif SC covering every CJK glyph used on the site,
+   so Chinese headings get a real serif instead of falling back to SimSun.
+   Regenerate with pyftsubset if new copy text is added. */
+@font-face {
+  font-family: "Noto Serif SC Subset";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("/fonts/noto-serif-sc-subset.woff2") format("woff2");
+}
+
 @theme {
   --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", "Songti SC", "STSong", "SimSun", serif;
+  --font-serif: "Cormorant Garamond", "Noto Serif SC Subset", "Songti SC", "STSong", "SimSun", serif;
   
   /* Earthy Premium Palette - Inspired by Nature & Sunlit Campus */
   --color-brand-50: #fbfaf8;  /* Warm ivory */
@@ -93,7 +127,7 @@
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/H0ZkAAAACHRSTlMA/////////9EwkUIAAAAlSURBVDjLxY3BEcMwCEPBz0kFcg3P/qt0GDAwlL7+JgKBhPD+4VnO+rZftb1Xy9n1a/vE3vGZ1L33uT+r18kS5yT2lK8+9/oHn5y4v85I+Nw+sXz3nN+799m8R61v027xHplY52P5yHPy5M995u/2P1H7D3L35s/J3+A9yP0/5u/7P3Lv7Tnm/yD3w5kH3M+55///IEdAAAAAElFTkSuQmCC");
     background-repeat: repeat;
     background-size: 50px 50px;
-    background-attachment: fixed;
+    /* no background-attachment: fixed — iOS Safari ignores it and it causes scroll jank */
   }
 }
 

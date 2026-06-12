@@ -2,21 +2,139 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
-      content="校园旧衣回收、二手商店与 AI 环保助手。"
+      content="落叶生花 Campus Cycle — 校园旧衣回收、二手商店与 AI 环保助手。用透明度与设计，重塑校园社区的衣物生命周期。"
     />
-    <link rel="preconnect" href="https://image.mux.com" crossorigin />
+    <meta name="theme-color" content="#efeae0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content="落叶生花 · Campus Cycle" />
+    <meta property="og:description" content="校园旧衣回收、二手商店与 AI 环保助手。让每一件衣物，讲述循环重生的故事。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/images/hero-poster.webp" />
     <link
       rel="preload"
       as="image"
-      href="https://image.mux.com/VPgqHsW01gQWsfKJcgItYfkeyYYIvJ4DubLbEChs8Tsg/thumbnail.webp?width=1600&height=1000&fit_mode=crop&time=1"
+      href="/images/hero-poster.webp"
       fetchpriority="high"
     />
-    <title>落叶生花</title>
+    <link rel="preload" as="video" href="/videos/hero.mp4" type="video/mp4" />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/cormorant-garamond.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/noto-serif-sc-subset.woff2"
+      crossorigin
+    />
+    <title>落叶生花 · Campus Cycle — 校园旧衣循环平台</title>
+    <style>
+      /* Splash screen: inline so it paints on the very first frame,
+         before any JS loads. Removed by window.__hideAppSplash(). */
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        background: #efeae0;
+        color: #1a1b14;
+        transition: opacity 0.7s ease, visibility 0.7s ease;
+      }
+      #app-splash.app-splash--hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .app-splash__mark {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        animation: app-splash-in 1s ease both;
+      }
+      .app-splash__title {
+        font-family: "Noto Serif SC Subset", "Songti SC", "STSong", "SimSun", serif;
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: 0.35em;
+        text-indent: 0.35em;
+      }
+      .app-splash__sub {
+        font-size: 11px;
+        letter-spacing: 0.5em;
+        text-indent: 0.5em;
+        color: #827e6e;
+      }
+      .app-splash__bar {
+        width: 160px;
+        height: 1px;
+        background: #dfd8c7;
+        overflow: hidden;
+      }
+      .app-splash__bar i {
+        display: block;
+        height: 100%;
+        width: 40%;
+        background: #1a1b14;
+        animation: app-splash-slide 1.2s ease-in-out infinite;
+      }
+      @keyframes app-splash-slide {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(350%); }
+      }
+      @keyframes app-splash-in {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .app-splash__mark { animation: none; }
+        .app-splash__bar { display: none; }
+      }
+    </style>
   </head>
   <body>
+    <div id="app-splash" aria-hidden="true">
+      <div class="app-splash__mark">
+        <svg width="42" height="42" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M44 18c-12 1.5-20 7-22.5 15.5-1.6 5.4-.6 10.3.9 13.2.5-4.3 2.1-9.4 5.6-13.7-1 3.4-1.6 8.6-.3 12.9C30.5 47 35 48 38.5 45.5 45.5 40.5 46.5 27 44 18z" fill="#1a1b14"/>
+          <path d="M22 44.5C26 38 32.5 32 41 28.5" stroke="#efeae0" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="app-splash__title">落叶生花</span>
+        <span class="app-splash__sub">CAMPUS CYCLE</span>
+      </div>
+      <div class="app-splash__bar"><i></i></div>
+    </div>
+    <script>
+      (function () {
+        var start = Date.now();
+        var MIN_SHOW_MS = 700;
+        var el = document.getElementById('app-splash');
+        function hide() {
+          if (!el) return;
+          var target = el;
+          el = null;
+          var wait = Math.max(0, MIN_SHOW_MS - (Date.now() - start));
+          setTimeout(function () {
+            target.classList.add('app-splash--hidden');
+            setTimeout(function () { target.remove(); }, 800);
+          }, wait);
+        }
+        window.__hideAppSplash = hide;
+        // Safety net: never hold the splash longer than 5s no matter what.
+        setTimeout(hide, 5000);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

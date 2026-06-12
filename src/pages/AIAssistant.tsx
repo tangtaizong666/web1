@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { House, LogOut, PanelLeft, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ConversationSidebar } from '../components/ai/ConversationSidebar';
+import { SunlitBackground } from '../components/ai/SunlitBackground';
 import { MessageList } from '../components/ai/MessageList';
 import { ChatComposer } from '../components/ai/ChatComposer';
 import { AuthModal } from '../components/auth/AuthModal';
@@ -121,11 +122,16 @@ export default function AIAssistant() {
   }, [refreshConversations, user]);
 
   if (isLoading) {
-    return <div className="flex min-h-screen items-center justify-center">加载中...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F1E5] text-[#7F6B58]">
+        加载中...
+      </div>
+    );
   }
 
   return (
-    <div className="relative flex h-[100svh] max-w-full overflow-hidden bg-[#FDFBF7]">
+    <div className="relative flex h-[100svh] max-w-full overflow-hidden bg-[#F6F1E5] text-[#362A1F]">
+      <SunlitBackground />
       {authMode ? (
         <AuthModal
           mode={authMode}
@@ -143,7 +149,7 @@ export default function AIAssistant() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsSidebarOpen(false)}
-              className="absolute inset-0 z-20 bg-black/20"
+              className="absolute inset-0 z-20 bg-[#362A1F]/30"
               aria-label="关闭对话侧边栏遮罩"
             />
             <motion.div
@@ -170,26 +176,26 @@ export default function AIAssistant() {
         ) : null}
       </AnimatePresence>
 
-      <div className="flex min-w-0 max-w-full flex-1 flex-col overflow-hidden">
-        <header className="flex max-w-full flex-wrap items-center justify-between gap-3 overflow-hidden border-b border-[#DECFBE] bg-white/80 px-3 py-3 backdrop-blur md:flex-nowrap md:px-4">
+      <div className="relative z-10 flex min-w-0 max-w-full flex-1 flex-col overflow-hidden">
+        <header className="flex max-w-full flex-wrap items-center justify-between gap-3 overflow-hidden border-b border-[#E0D5C1]/80 bg-[#FDFBF7]/70 px-3 py-3 backdrop-blur-md md:flex-nowrap md:px-4">
           <div className="flex w-full min-w-0 max-w-full items-center gap-2 md:w-auto md:flex-1 md:gap-3">
             <button
               type="button"
               onClick={() => setIsSidebarOpen((current) => !current)}
-              className="rounded-full border border-[#DECFBE] bg-white p-2 text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA]"
+              className="rounded-full border border-[#DECFBE] bg-white/70 p-2 text-[#362A1F] shadow-sm transition hover:bg-white"
               aria-label={isSidebarOpen ? '关闭侧边栏' : '打开侧边栏'}
             >
               <PanelLeft className="h-5 w-5" />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium text-[#362A1F]">AI 循环助手</div>
-              <div className="truncate text-xs text-[#7F6B58]">
+              <div className="font-serif text-base tracking-wide text-[#362A1F]">AI 循环助手</div>
+              <div className="truncate text-xs text-[#8A7866]">
                 {user ? `已登录：${user.email}` : '游客模式可直接聊天，登录后会自动导入当前记录'}
               </div>
             </div>
             <Link
               to="/"
-              className="ml-0 inline-flex shrink-0 items-center gap-1 rounded-full border border-[#DECFBE] bg-white px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA] md:ml-2 md:gap-2"
+              className="ml-0 inline-flex shrink-0 items-center gap-1 rounded-full border border-[#DECFBE] bg-white/70 px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-white md:ml-2 md:gap-2"
             >
               <House className="h-4 w-4" />
               <span className="hidden sm:inline">返回首页</span>
@@ -199,13 +205,13 @@ export default function AIAssistant() {
           <div className="flex w-full min-w-0 items-center gap-2 md:ml-auto md:w-auto md:shrink-0 md:justify-end">
             {user ? (
               <>
-                <span className="hidden rounded-full border border-[#DECFBE] bg-[#F8F2EA] px-3 py-2 text-xs text-[#7F6B58] md:inline-flex">
+                <span className="hidden rounded-full border border-[#DECFBE] bg-white/60 px-3 py-2 text-xs text-[#8A7866] md:inline-flex">
                   记录已绑定账号
                 </span>
                 <button
                   type="button"
                   onClick={() => void logoutUser()}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#DECFBE] bg-white px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA]"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#DECFBE] bg-white/70 px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-white"
                 >
                   <LogOut className="h-4 w-4" />
                   退出
@@ -216,14 +222,14 @@ export default function AIAssistant() {
                 <button
                   type="button"
                   onClick={() => setAuthMode('login')}
-                  className="min-w-0 flex-1 rounded-full border border-[#DECFBE] bg-white px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-[#F8F2EA] md:w-auto md:flex-none md:px-4"
+                  className="min-w-0 flex-1 rounded-full border border-[#DECFBE] bg-white/70 px-3 py-2 text-sm text-[#362A1F] shadow-sm transition hover:bg-white md:w-auto md:flex-none md:px-4"
                 >
                   登录
                 </button>
                 <button
                   type="button"
                   onClick={() => setAuthMode('register')}
-                  className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#362A1F] px-3 py-2 text-sm text-white transition hover:bg-[#4A3A2D] md:w-auto md:flex-none md:gap-2 md:px-4"
+                  className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#986E4B] px-3 py-2 text-sm text-white transition hover:bg-[#86603F] md:w-auto md:flex-none md:gap-2 md:px-4"
                 >
                   <UserRound className="hidden h-4 w-4 sm:block" />
                   注册
@@ -234,12 +240,19 @@ export default function AIAssistant() {
         </header>
 
         {pageNotice || conversationsNotice ? (
-          <div className="border-b border-[#E8DACA] bg-[#FFF6EA] px-4 py-3 text-sm text-[#8D643E]">
+          <div className="border-b border-[#E8DACA] bg-[#FFF6EA]/90 px-4 py-3 text-sm text-[#8D643E]">
             {pageNotice || conversationsNotice}
           </div>
         ) : null}
 
-        <MessageList messages={messages} pageError={conversationsError || messagesError} />
+        <MessageList
+          messages={messages}
+          pageError={conversationsError || messagesError}
+          sending={sending}
+          onSuggestion={(text) => {
+            void submitMessage(text);
+          }}
+        />
         <ChatComposer
           sending={sending}
           attachments={attachments}

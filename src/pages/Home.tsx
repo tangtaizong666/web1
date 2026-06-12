@@ -6,6 +6,7 @@ import Hero from '../components/Hero';
 import { Recycle, ShoppingBag, Heart, Sparkles } from 'lucide-react';
 import { AuthModal } from '../components/auth/AuthModal';
 import { useAuth } from '../hooks/useAuth';
+import { hideAppSplash } from '../lib/splash';
 
 const Advantages = lazy(() => import('../components/Advantages'));
 const Workflow = lazy(() => import('../components/Workflow'));
@@ -65,20 +66,29 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-brand-100 selection:bg-brand-900 selection:text-brand-50">
-      <div className="fixed left-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-brand-200 bg-brand-50/90 px-3 py-2 shadow-sm backdrop-blur">
+      <div className="fixed left-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-1 rounded-full border border-brand-200/80 bg-brand-50/80 p-1.5 shadow-sm backdrop-blur-md">
         {user ? (
           <>
-            <span className="text-sm text-brand-700">{user.email}</span>
-            <button onClick={() => void logoutUser()} className="text-sm text-brand-900">
+            <span className="truncate px-3 text-sm text-brand-700">{user.email}</span>
+            <button
+              onClick={() => void logoutUser()}
+              className="rounded-full px-4 py-1.5 text-sm text-brand-900 transition-colors hover:bg-brand-200/60"
+            >
               退出
             </button>
           </>
         ) : (
           <>
-            <button onClick={() => setAuthMode('login')} className="text-sm text-brand-900">
+            <button
+              onClick={() => setAuthMode('login')}
+              className="rounded-full bg-brand-900 px-4 py-1.5 text-sm font-medium text-brand-50 transition-colors hover:bg-brand-700"
+            >
               登录
             </button>
-            <button onClick={() => setAuthMode('register')} className="text-sm text-brand-500">
+            <button
+              onClick={() => setAuthMode('register')}
+              className="rounded-full px-4 py-1.5 text-sm text-brand-700 transition-colors hover:bg-brand-200/60"
+            >
               注册
             </button>
           </>
@@ -94,7 +104,7 @@ export default function Home() {
       ) : null}
 
       <main>
-        <Hero />
+        <Hero onHeroReady={hideAppSplash} onHeroError={hideAppSplash} />
         
         {/* Oryzo-style Cinematic Break */}
         <section className="negative-space flex items-center justify-center text-center">
@@ -135,9 +145,9 @@ export default function Home() {
             </motion.h2>
             
             <div className="flex w-full max-w-4xl flex-col items-stretch justify-center gap-4 px-0 sm:px-4 lg:flex-row lg:items-center lg:gap-6">
-              <button 
+              <button
                 onClick={() => navigate('/recycle')}
-                className="flex w-full items-center justify-center gap-3 rounded-full border border-brand-900 px-6 py-4 text-center font-serif text-lg italic text-brand-900 shadow-[0_4px_14px_rgba(0,0,0,0.05)] transition-colors hover:bg-brand-900 hover:text-brand-50 lg:w-1/3 lg:px-8 lg:py-6 lg:text-xl"
+                className="flex w-full items-center justify-center gap-3 rounded-full border border-brand-900 bg-brand-900 px-6 py-4 text-center font-serif text-lg italic text-brand-50 shadow-[0_8px_24px_rgba(26,27,20,0.25)] transition-colors hover:bg-brand-700 lg:w-1/3 lg:px-8 lg:py-6 lg:text-xl"
               >
                 <Recycle className="w-5 h-5 flex-shrink-0" />
                 立即投递旧衣
@@ -165,28 +175,31 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-brand-900 rounded-full flex items-center justify-center text-brand-50 font-serif italic">C</div>
-              <span className="font-serif text-3xl tracking-tighter uppercase">Campus Cycle</span>
+              <img src="/favicon.svg" alt="落叶生花标志" className="w-9 h-9" />
+              <div className="flex flex-col">
+                <span className="font-serif text-3xl tracking-tight">落叶生花</span>
+                <span className="text-xs uppercase tracking-[0.3em] text-brand-400">Campus Cycle</span>
+              </div>
             </div>
             <p className="text-brand-500 max-w-xs font-light tracking-wide leading-relaxed">
               用透明度与设计，重塑校园社区的衣物生命周期。
             </p>
           </div>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-12 text-[10px] uppercase tracking-[0.2em] font-bold text-brand-700">
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-12 text-xs uppercase tracking-[0.2em] font-bold text-brand-700">
             <div className="flex flex-col gap-4">
               <span className="text-brand-300">导航</span>
-              <a href="#" className="hover:text-brand-900">平台介绍</a>
-              <a href="#" className="hover:text-brand-900">系列展示</a>
-              <a href="#" className="hover:text-brand-900">物流溯源</a>
+              <button onClick={() => lenisRef.current?.scrollTo(0)} className="text-left hover:text-brand-900 transition-colors">平台介绍</button>
+              <button onClick={() => navigate('/shop')} className="text-left hover:text-brand-900 transition-colors">系列展示</button>
+              <button onClick={() => navigate('/recycle')} className="text-left hover:text-brand-900 transition-colors">物流溯源</button>
             </div>
             <div className="flex flex-col gap-4">
               <span className="text-brand-300">联系我们</span>
-              <a href="#" className="hover:text-brand-900">小红书</a>
-              <a href="#" className="hover:text-brand-900">微信</a>
-              <a href="#" className="hover:text-brand-900">邮箱</a>
+              <span>小红书</span>
+              <span>微信</span>
+              <span>邮箱</span>
             </div>
-            <div className="flex flex-col gap-4 hidden lg:flex">
+            <div className="hidden flex-col gap-4 lg:flex">
               <span className="text-brand-300">关于</span>
               <div className="flex items-center gap-2">
                 在校园里赋予旧衣新生 <Heart className="w-3 h-3 text-red-500 fill-red-500" />
@@ -194,8 +207,8 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-brand-200 text-[10px] uppercase tracking-[0.2em] text-brand-400 font-medium">
-          © 2026 Campus Cycle. AI Studio Build.
+        <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-brand-200 text-xs uppercase tracking-[0.2em] text-brand-400 font-medium">
+          © 2026 落叶生花 Campus Cycle
         </div>
       </footer>
     </div>

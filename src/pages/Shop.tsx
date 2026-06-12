@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ArrowLeft, ChevronDown, X, ShoppingCart } from 'lucide-react';
+import { Search, ArrowLeft, Check, ChevronDown, X, ShoppingCart } from 'lucide-react';
 import { PRODUCTS, CATEGORIES } from '../data/products';
 
 export default function Shop() {
@@ -84,10 +84,10 @@ export default function Shop() {
           >
              <div className="relative aspect-[3/4] w-full max-w-[320px] overflow-hidden rounded-t-full border-4 border-brand-100 shadow-2xl sm:max-w-[400px]">
                 <img 
-                  src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1000&auto=format&fit=crop" 
+                  src="/images/products/1490481651871-ab68de25d43d.jpg" 
                   className="w-full h-full object-cover bg-brand-200" 
                   alt="Sustainable Fashion Hero" 
-                  referrerPolicy="no-referrer"
+                 
                 />
              </div>
           </motion.div>
@@ -161,7 +161,8 @@ export default function Shop() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
                   </div>
@@ -194,7 +195,7 @@ export default function Shop() {
                  className="col-span-full py-24 text-center"
                >
                   <p className="text-brand-500 font-serif italic text-xl">
-                    Ops! 没有找到符合条件的商品。
+                    Oops! 没有找到符合条件的商品。
                   </p>
                   <button 
                     onClick={() => {
@@ -228,6 +229,12 @@ export default function Shop() {
 // Separate component for the Modal to keep Shop clean
 function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClose: () => void }) {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [addedToBag, setAddedToBag] = useState(false);
+
+  const handleBuy = () => {
+    setAddedToBag(true);
+    window.setTimeout(() => setAddedToBag(false), 2000);
+  };
   
   return (
     <motion.div
@@ -270,8 +277,23 @@ function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClo
               {product.description}
             </p>
 
-            <button className="w-fit flex items-center gap-3 bg-brand-50 text-brand-900 px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-brand-200 transition-colors">
-              <ShoppingCart className="w-5 h-5" /> 立即购买
+            <button
+              onClick={handleBuy}
+              className={`w-fit flex items-center gap-3 px-8 py-4 text-sm font-bold uppercase tracking-widest transition-colors ${
+                addedToBag
+                  ? 'bg-brand-200 text-brand-900'
+                  : 'bg-brand-50 text-brand-900 hover:bg-brand-200'
+              }`}
+            >
+              {addedToBag ? (
+                <>
+                  <Check className="w-5 h-5" /> 已加入购物袋
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-5 h-5" /> 立即购买
+                </>
+              )}
             </button>
 
             {/* Specifications Section */}
@@ -302,7 +324,7 @@ function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClo
                   onClick={() => setActiveImageIdx(idx)}
                   className={`h-14 w-11 overflow-hidden rounded-md border-2 transition-all duration-300 md:h-20 md:w-16 ${activeImageIdx === idx ? 'border-brand-900 shadow-md transform scale-110' : 'border-transparent opacity-60 hover:opacity-100'}`}
                 >
-                  <img src={thumb} className="w-full h-full object-cover" alt="thumbnail" referrerPolicy="no-referrer" />
+                  <img src={thumb} className="w-full h-full object-cover" alt="thumbnail" />
                 </button>
               ))}
            </div>
@@ -317,7 +339,7 @@ function ProductModal({ product, onClose }: { product: typeof PRODUCTS[0], onClo
                 transition={{ duration: 0.4 }}
                 src={product.thumbnails[activeImageIdx]}
                 alt={product.name}
-                referrerPolicy="no-referrer"
+               
                 className="h-auto max-h-full w-full max-w-[72%] object-contain drop-shadow-2xl md:max-w-[80%]"
              />
            </AnimatePresence>

@@ -7,21 +7,21 @@ const items = [
     name: "校园基础连帽卫衣",
     category: "再流通",
     price: "¥39",
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800&h=1000"
+    image: "/images/products/1556821840-3a63f95609a7.jpg"
   },
   {
     id: 2,
     name: "建筑感解构丹宁",
     category: "解构重塑",
     price: "¥189",
-    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&q=80&w=800&h=1000"
+    image: "/images/products/1541099649105-f69ad21f3246.jpg"
   },
   {
     id: 3,
     name: "极简纯棉T恤",
     category: "纯净基础款",
     price: "¥19",
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800&h=1000"
+    image: "/images/products/1521572163474-6864f9cf17ab.jpg"
   }
 ];
 
@@ -54,13 +54,14 @@ export default function Showcase() {
               className="group flex flex-col cursor-pointer"
             >
               <div className="aspect-[3/4] overflow-hidden bg-brand-800">
-                <motion.img 
+                <motion.img
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-                  src={item.image} 
+                  src={item.image}
                   alt={item.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
                 />
               </div>
               

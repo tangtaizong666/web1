@@ -1,31 +1,12 @@
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
-import { createElement, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Recycle, ShoppingBag, Sparkles } from 'lucide-react';
 
-const MUX_PLAYBACK_ID = 'VPgqHsW01gQWsfKJcgItYfkeyYYIvJ4DubLbEChs8Tsg';
-const HERO_POSTER_URL = `https://image.mux.com/${MUX_PLAYBACK_ID}/thumbnail.webp?width=1600&height=1000&fit_mode=crop&time=1`;
-const MUX_PLAYER_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/@mux/mux-player@3/dist/mux-player.mjs';
-
-function ensureMuxPlayerScript() {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return;
-  }
-
-  if (window.customElements?.get('mux-player')) {
-    return;
-  }
-
-  if (document.querySelector(`script[src="${MUX_PLAYER_SCRIPT_URL}"]`)) {
-    return;
-  }
-
-  const script = document.createElement('script');
-  script.type = 'module';
-  script.src = MUX_PLAYER_SCRIPT_URL;
-  script.async = true;
-  document.head.appendChild(script);
-}
+// Poster and video are served from our own origin: no player script, no HLS
+// negotiation, so the hero turns dynamic almost immediately on any network.
+const HERO_POSTER_URL = '/images/hero-poster.webp';
+const HERO_VIDEO_URL = '/videos/hero.mp4';
 
 type HeroProps = {
   onHeroReady?: () => void;
@@ -35,12 +16,23 @@ type HeroProps = {
 
 export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroProps) {
   const container = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLElement | null>(null);
+  const posterRef = useRef<HTMLImageElement | null>(null);
   const didNotifyHeroReady = useRef(false);
+  const didMarkPosterLoaded = useRef(false);
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const [posterLoaded, setPosterLoaded] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+
+  const markPosterLoaded = () => {
+    if (didMarkPosterLoaded.current) {
+      return;
+    }
+
+    didMarkPosterLoaded.current = true;
+    setPosterLoaded(true);
+    onPosterReady?.();
+  };
   const { scrollYProgress } = useScroll({
     target: container,
     offset: ['start start', 'end start'],
@@ -49,34 +41,20 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const shouldLoadVideo = posterLoaded && prefersReducedMotion !== true;
+  // The video is tiny and local, so fetch it in parallel with the poster
+  // instead of waiting for the poster to finish first.
+  const shouldLoadVideo = prefersReducedMotion !== true;
   const heroMediaReady = posterLoaded && (!shouldLoadVideo || videoLoaded);
 
+  // A cached poster can finish loading before React attaches the onLoad
+  // handler, so also check `complete` once after mount.
   useEffect(() => {
-    if (!shouldLoadVideo) {
-      return;
+    const poster = posterRef.current;
+    if (poster?.complete && poster.naturalWidth > 0) {
+      markPosterLoaded();
     }
-
-    ensureMuxPlayerScript();
-  }, [shouldLoadVideo]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!shouldLoadVideo || !video) {
-      return;
-    }
-
-    const handlePlaying = () => setVideoLoaded(true);
-    const handleError = () => onHeroError?.();
-
-    video.addEventListener('playing', handlePlaying);
-    video.addEventListener('error', handleError);
-
-    return () => {
-      video.removeEventListener('playing', handlePlaying);
-      video.removeEventListener('error', handleError);
-    };
-  }, [onHeroError, shouldLoadVideo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!heroMediaReady || didNotifyHeroReady.current) {
@@ -92,49 +70,34 @@ export default function Hero({ onHeroReady, onHeroError, onPosterReady }: HeroPr
       <div className="sticky top-0 flex h-[100svh] w-full items-center justify-center overflow-hidden md:h-screen">
         <motion.div style={{ scale, opacity }} className="absolute inset-0 z-0 overflow-hidden">
           <motion.img
+            ref={posterRef}
             src={HERO_POSTER_URL}
             alt="Campus Cycle hero poster"
             decoding="async"
             fetchPriority="high"
-            onLoad={() => {
-              setPosterLoaded(true);
-              onPosterReady?.();
-            }}
+            onLoad={markPosterLoaded}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
               videoLoaded ? 'opacity-0' : 'opacity-75'
             }`}
             style={{ scale: prefersReducedMotion ? 1 : 1.04 }}
           />
 
-          {shouldLoadVideo
-            ? createElement('mux-player', {
-                'playback-id': MUX_PLAYBACK_ID,
-                autoplay: 'muted',
-                muted: true,
-                loop: true,
-                playsinline: true,
-                preload: 'auto',
-                'stream-type': 'on-demand',
-                title: 'Campus Cycle background video',
-                ref: (node: HTMLElement | null) => {
-                  videoRef.current = node;
-                },
-                className: `pointer-events-none absolute left-1/2 top-1/2 h-[100svh] min-h-[100svh] min-w-[177.77svh] w-[177.77svh] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000 md:h-[56.25vw] md:min-h-[100vh] md:min-w-[177.77vh] md:w-[100vw] ${
-                  videoLoaded ? 'opacity-80' : 'opacity-0'
-                }`,
-                style: {
-                  '--controls': 'none',
-                  '--media-object-fit': 'cover',
-                  '--media-object-position': 'center',
-                  '--play-button': 'none',
-                  '--center-controls': 'none',
-                  '--bottom-controls': 'none',
-                  '--top-controls': 'none',
-                  '--loading-indicator': 'none',
-                  background: 'transparent',
-                },
-              })
-            : null}
+          {shouldLoadVideo ? (
+            <video
+              src={HERO_VIDEO_URL}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              onPlaying={() => setVideoLoaded(true)}
+              onError={() => onHeroError?.()}
+              className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+                videoLoaded ? 'opacity-80' : 'opacity-0'
+              }`}
+            />
+          ) : null}
 
           <div className="pointer-events-none absolute inset-0 -z-10 bg-brand-900 opacity-30 kraft-texture" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-900/35 via-brand-900/10 to-brand-900" />

@@ -3,8 +3,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import Hero from './Hero';
 
+function queryVideo() {
+  return document.querySelector('video');
+}
+
 describe('Hero', () => {
-  it('renders a poster image before loading the background video player', () => {
+  it('renders the poster and starts loading the local background video immediately', () => {
     render(
       <MemoryRouter>
         <Hero />
@@ -12,25 +16,14 @@ describe('Hero', () => {
     );
 
     expect(screen.getByRole('img', { name: 'Campus Cycle hero poster' })).toBeTruthy();
-    expect(document.querySelector('mux-player')).toBeNull();
-  });
 
-  it('loads the background video player only after the poster has loaded', () => {
-    render(
-      <MemoryRouter>
-        <Hero />
-      </MemoryRouter>,
-    );
-
-    fireEvent.load(screen.getByRole('img', { name: 'Campus Cycle hero poster' }));
-
-    const video = document.querySelector('mux-player');
+    const video = queryVideo();
     expect(video).toBeTruthy();
-    expect(video?.getAttribute('playback-id')).toBe('VPgqHsW01gQWsfKJcgItYfkeyYYIvJ4DubLbEChs8Tsg');
-    expect(video?.getAttribute('autoplay')).toBe('muted');
-    expect(video?.hasAttribute('muted')).toBe(true);
+    expect(video?.getAttribute('src')).toBe('/videos/hero.mp4');
+    expect(video?.hasAttribute('autoplay')).toBe(true);
     expect(video?.hasAttribute('loop')).toBe(true);
     expect(video?.hasAttribute('playsinline')).toBe(true);
+    expect(video?.muted).toBe(true);
   });
 
   it('fades out the poster once the video is playing to avoid ghosting', () => {
@@ -43,9 +36,7 @@ describe('Hero', () => {
     const poster = screen.getByRole('img', { name: 'Campus Cycle hero poster' });
     expect(poster.className).toContain('opacity-75');
 
-    fireEvent.load(poster);
-
-    const video = document.querySelector('mux-player');
+    const video = queryVideo();
     expect(video).toBeTruthy();
     expect(video?.className).toContain('opacity-0');
 
@@ -69,7 +60,7 @@ describe('Hero', () => {
     expect(handlePosterReady).toHaveBeenCalledTimes(1);
   });
 
-  it('waits for the video playing event before notifying that the hero is ready', () => {
+  it('waits for both the poster and the video playing event before notifying ready', () => {
     const handleHeroReady = vi.fn();
 
     render(
@@ -82,7 +73,7 @@ describe('Hero', () => {
 
     expect(handleHeroReady).not.toHaveBeenCalled();
 
-    const video = document.querySelector('mux-player');
+    const video = queryVideo();
     expect(video).toBeTruthy();
 
     fireEvent(video!, new Event('playing'));
@@ -90,37 +81,21 @@ describe('Hero', () => {
     expect(handleHeroReady).toHaveBeenCalledTimes(1);
   });
 
-  it('also waits for the video playing event on mobile', () => {
-    const originalMatchMedia = window.matchMedia;
-    Object.defineProperty(window, 'matchMedia', {
-      configurable: true,
-      value: vi.fn(() => ({
-        matches: false,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    });
-    const handleHeroReady = vi.fn();
+  it('notifies an error when the video fails to load', () => {
+    const handleHeroError = vi.fn();
 
     render(
       <MemoryRouter>
-        <Hero onHeroReady={handleHeroReady} />
+        <Hero onHeroError={handleHeroError} />
       </MemoryRouter>,
     );
 
-    fireEvent.load(screen.getByRole('img', { name: 'Campus Cycle hero poster' }));
-
-    const video = document.querySelector('mux-player');
+    const video = queryVideo();
     expect(video).toBeTruthy();
-    expect(handleHeroReady).not.toHaveBeenCalled();
 
-    fireEvent(video!, new Event('playing'));
+    fireEvent(video!, new Event('error'));
 
-    expect(handleHeroReady).toHaveBeenCalledTimes(1);
-
-    Object.defineProperty(window, 'matchMedia', {
-      configurable: true,
-      value: originalMatchMedia,
-    });
+    expect(handleHeroError).toHaveBeenCalledTimes(1);
   });
+
 });

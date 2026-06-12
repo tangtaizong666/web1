@@ -51,6 +51,7 @@ export default function FAQ() {
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
+                  aria-expanded={isOpen}
                   className="w-full py-8 md:py-10 flex items-center justify-between text-left focus:outline-none"
                 >
                   <span className={cn(

@@ -1,4 +1,47 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { z } from 'zod';
+
+function loadDotEnvFile() {
+  const envPath = path.resolve(process.cwd(), '.env');
+
+  if (!fs.existsSync(envPath)) {
+    return;
+  }
+
+  const contents = fs.readFileSync(envPath, 'utf8');
+
+  for (const line of contents.split(/\r?\n/)) {
+    const trimmedLine = line.trim();
+
+    if (!trimmedLine || trimmedLine.startsWith('#')) {
+      continue;
+    }
+
+    const separatorIndex = trimmedLine.indexOf('=');
+
+    if (separatorIndex === -1) {
+      continue;
+    }
+
+    const key = trimmedLine.slice(0, separatorIndex).trim().replace(/^export\s+/, '');
+
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key) || process.env[key] !== undefined) {
+      continue;
+    }
+
+    let value = trimmedLine.slice(separatorIndex + 1).trim();
+    const quote = value[0];
+
+    if ((quote === '"' || quote === "'") && value.endsWith(quote)) {
+      value = value.slice(1, -1);
+    }
+
+    process.env[key] = value.replace(/\\n/g, '\n');
+  }
+}
+
+loadDotEnvFile();
 
 const nodeEnvSchema = z.enum(['development', 'test', 'production']);
 

@@ -182,9 +182,11 @@ export default function RecyclePage() {
   const [pendingLocateTarget, setPendingLocateTarget] = useState<LocateTarget | null>(null);
 
   const [clothingType, setClothingType] = useState(CLOTHING_TYPES[0]);
-  const [qty, setQty] = useState(1);
+  const [qtyInput, setQtyInput] = useState('1');
   const [condition, setCondition] = useState(CONDITIONS[1].level);
+  const [showSubmitSuccess, setShowSubmitSuccess] = useState(false);
 
+  const qty = Math.min(100, Math.max(1, Number.parseInt(qtyInput, 10) || 1));
   const selectedCond = CONDITIONS.find(c => c.level === condition)!;
   const minPoints = selectedCond.minPts * qty;
   const maxPoints = selectedCond.maxPts * qty;
@@ -335,10 +337,10 @@ export default function RecyclePage() {
       <div className="absolute -top-40 -left-40 w-[800px] h-[800px] bg-gradient-to-br from-[#CDA885]/30 to-transparent blur-3xl rounded-full pointer-events-none" />
       <div className="absolute top-[20%] -right-32 w-[600px] h-[600px] bg-[#BB9D7E]/10 blur-[100px] rounded-full pointer-events-none" />
       
-      {/* Subtle noisy overlay for texture */}
-      <div 
+      {/* Subtle noisy overlay for texture (inline SVG — no external host) */}
+      <div
         className="absolute inset-0 opacity-[0.03] mix-blend-multiply pointer-events-none"
-        style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }} 
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }}
       />
 
       <div className="relative z-10 px-5 pb-24 pt-6 md:px-12 md:pb-32 md:pt-8 lg:px-20">
@@ -350,8 +352,8 @@ export default function RecyclePage() {
           >
             <ArrowLeft className="w-5 h-5" /> 返回首页
           </button>
-          <div className="hidden max-w-[48vw] shrink-0 truncate rounded-full border border-[#DECFBE] bg-white/40 px-4 py-1.5 font-serif text-base italic tracking-widest text-[#4A3D30] backdrop-blur-sm sm:block md:max-w-none md:px-5 md:text-xl">
-            Rennale Renuelly
+          <div className="hidden max-w-[48vw] shrink-0 truncate rounded-full border border-[#DECFBE] bg-white/40 px-4 py-1.5 font-serif text-base tracking-widest text-[#4A3D30] backdrop-blur-sm sm:block md:max-w-none md:px-5 md:text-xl">
+            落叶生花 <span className="italic">· Campus Cycle</span>
           </div>
         </nav>
 
@@ -567,13 +569,14 @@ export default function RecyclePage() {
                          </div>
                          <div className="w-full sm:w-1/3">
                              <label className="text-xs mb-3 block text-[#986E4B] font-bold uppercase tracking-wider">Qty / 数量(件)</label>
-                             <input 
-                                type="number" 
-                                min="1" 
-                                max="100" 
-                                value={qty}
-                                onChange={e => setQty(Number(e.target.value) || 1)}
-                                className="w-full bg-[#F4F0E8] border border-[#DECFBE] rounded-xl px-5 py-4 text-sm font-medium outline-none text-[#4A3D30] focus:border-[#986E4B] shadow-inner" 
+                             <input
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={qtyInput}
+                                onChange={e => setQtyInput(e.target.value)}
+                                onBlur={() => setQtyInput(String(qty))}
+                                className="w-full bg-[#F4F0E8] border border-[#DECFBE] rounded-xl px-5 py-4 text-sm font-medium outline-none text-[#4A3D30] focus:border-[#986E4B] shadow-inner"
                              />
                          </div>
                      </div>
@@ -624,8 +627,8 @@ export default function RecyclePage() {
                           </div>
                      </div>
 
-                     <button 
-                       onClick={() => alert('感谢您的预约！我们会尽快与您联系。')}
+                     <button
+                       onClick={() => setShowSubmitSuccess(true)}
                        className="w-full py-5 mt-4 bg-[#8E6545] text-[#FDFBF7] font-serif tracking-[0.2em] hover:bg-[#6C4B30] transition-colors rounded-2xl text-lg shadow-[0_8px_20px_rgba(142,101,69,0.25)]"
                      >
                          {method === 'dropoff' ? '保存预约信息' : '确认提交并预约'}
@@ -654,6 +657,51 @@ export default function RecyclePage() {
             userLocation={userLocation}
           />
         )}
+      </AnimatePresence>
+
+      {/* Submit Success Dialog — styled to match the warm tea aesthetic */}
+      <AnimatePresence>
+        {showSubmitSuccess ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-[#362A1F]/40 p-5 backdrop-blur-sm"
+            onClick={() => setShowSubmitSuccess(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.96 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 240 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-[#E8DFC9] bg-[#FAF8F3] p-8 text-center shadow-[0_25px_60px_rgba(54,42,31,0.25)] md:p-10"
+            >
+              <div className="pointer-events-none absolute -right-8 -top-8 opacity-10">
+                <Leaf className="h-40 w-40 rotate-12 text-[#986E4B]" />
+              </div>
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[#DECFBE] bg-[#F4F0E8] shadow-inner">
+                <Sparkles className="h-7 w-7 text-[#986E4B]" />
+              </div>
+              <h3 className="mb-3 font-serif text-2xl tracking-wide text-[#362A1F] md:text-3xl">
+                预约提交成功
+              </h3>
+              <p className="mb-2 text-sm leading-6 text-[#6C5B49]">
+                {clothingType} × {qty} 件 · 预估 {minPoints} - {maxPoints} 积分
+              </p>
+              <p className="mb-8 text-sm leading-6 text-[#7F6B58]">
+                感谢您的善举！我们会尽快与您联系，
+                {method === 'dropoff' ? '请按预约时间前往附近的智能回收箱。' : '回收专员将按预约时间上门取件。'}
+              </p>
+              <button
+                onClick={() => setShowSubmitSuccess(false)}
+                className="w-full rounded-2xl bg-[#8E6545] py-4 font-serif text-base tracking-[0.2em] text-[#FDFBF7] shadow-[0_8px_20px_rgba(142,101,69,0.25)] transition-colors hover:bg-[#6C4B30]"
+              >
+                好的，期待新生
+              </button>
+            </motion.div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
 
       <AnimatePresence>

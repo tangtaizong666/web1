@@ -6,11 +6,11 @@ export const PRODUCTS = [
     price: 159,
     category: "裤装",
     tags: ["九成新", "环保亚麻"],
-    image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=800&auto=format&fit=crop",
+    image: "/images/products/1594633312681-425c7b97ccd1.jpg",
     thumbnails: [
-      "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1509551388413-e18d0ac5d395?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop"
+      "/images/products/1594633312681-425c7b97ccd1.jpg",
+      "/images/products/1434389677669-e08b4cac3105.jpg",
+      "/images/products/1483985988355-763728e1935b.jpg"
     ],
     description: "由高密度纯天然亚麻制成，吸汗透气，适合多季节穿着。版型宽松舒适，保护您的日常行走无拘无束。",
     specs: {
@@ -26,11 +26,11 @@ export const PRODUCTS = [
     price: 289,
     category: "外套",
     tags: ["复古", "耐磨"],
-    image: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=800&auto=format&fit=crop",
+    image: "/images/products/1576871337622-98d48d1cf531.jpg",
     thumbnails: [
-      "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?q=80&w=800&auto=format&fit=crop"
+      "/images/products/1576871337622-98d48d1cf531.jpg",
+      "/images/products/1516257984-b1b4d707412e.jpg",
+      "/images/products/1495105787522-5334e3ffa0ef.jpg"
     ],
     description: "经典重磅牛仔布料，经过环保水洗工艺处理。内里加固走线，越穿越有属于你自己的折痕与味道。",
     specs: {
@@ -46,11 +46,11 @@ export const PRODUCTS = [
     price: 129,
     category: "上衣",
     tags: ["全新暂未拆", "百搭"],
-    image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop",
+    image: "/images/products/1512436991641-6745cdb1723f.jpg",
     thumbnails: [
-      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1485230895905-efdc5a702b7e?q=80&w=800&auto=format&fit=crop"
+      "/images/products/1512436991641-6745cdb1723f.jpg",
+      "/images/products/1503342217505-b0a15ec3261c.jpg",
+      "/images/products/1598033129183-c4f50c736f10.jpg"
     ],
     description: "每个人衣橱里必备的白衬衫，采用天然植物纤维纺织，略带挺括感。全新未剪吊牌，适合各类正式或半正式场合。",
     specs: {
@@ -66,11 +66,11 @@ export const PRODUCTS = [
     price: 59,
     category: "上衣",
     tags: ["轻度使用"],
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop",
+    image: "/images/products/1521572163474-6864f9cf17ab.jpg",
     thumbnails: [
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?q=80&w=800&auto=format&fit=crop"
+      "/images/products/1521572163474-6864f9cf17ab.jpg",
+      "/images/products/1583743814966-8936f5b7be1a.jpg",
+      "/images/products/1586790170083-2f9ceadc732d.jpg"
     ],
     description: "轻盈透气的纯棉材质，亲肤柔软。经过标准清洗与消毒，保留了原有的版型，低调的森林绿呼应环保理念。",
     specs: {
@@ -86,11 +86,11 @@ export const PRODUCTS = [
     price: 329,
     category: "裙装",
     tags: ["仅试穿", "真丝"],
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop",
+    image: "/images/products/1595777457583-95e059d581b8.jpg",
     thumbnails: [
-      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=800&auto=format&fit=crop"
+      "/images/products/1595777457583-95e059d581b8.jpg",
+      "/images/products/1566150905458-1bf1fc113f0d.jpg",
+      "/images/products/1585487000160-6ebcfceb0d03.jpg"
     ],
     description: "剪裁完美贴合身材曲线，裙摆灵动。仅室内试穿过，吊牌已摘但几乎全新品相，晚宴与约会的极佳选择。",
     specs: {
@@ -106,11 +106,11 @@ export const PRODUCTS = [
     price: 499,
     category: "外套",
     tags: ["八成新", "经典款"],
-    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800&auto=format&fit=crop",
+    image: "/images/products/1591047139829-d91aecb6caea.jpg",
     thumbnails: [
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=800&auto=format&fit=crop"
+      "/images/products/1591047139829-d91aecb6caea.jpg",
+      "/images/products/1544022613-e87ca75a784a.jpg",
+      "/images/products/1551488831-00ddcb6c6bd3.jpg"
     ],
     description: "经典的双排扣风衣设计，防风防泼水面料。适合秋季微凉天气，立体剪裁，随性敞开或系带皆宜。",
     specs: {
